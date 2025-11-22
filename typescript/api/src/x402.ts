@@ -13,11 +13,10 @@ import { useFacilitator } from "x402/verify"
 
 import { env } from "./env/server.ts"
 
+const x402Version = 1
 const { verify, settle } = useFacilitator({
   url: env.X402_FACILITATOR_URL as `${string}://${string}`,
 })
-
-export const x402Version = 1
 
 export function createExactPaymentRequirements(
   price: Price,
@@ -87,7 +86,7 @@ export async function settlePayment(decodedPayment: PaymentPayload, paymentRequi
 }
 
 export interface X402MiddlewareConfig {
-  paymentRequirements: PaymentRequirements[] | ((c: Context) => PaymentRequirements[])
+  paymentRequirements: PaymentRequirements[] | ((c: Context) => PaymentRequirements[] | Promise<PaymentRequirements[]>)
   onVerified?: (c: Context, payment: PaymentPayload, requirement: PaymentRequirements) => Promise<void>
   onSettle?: (
     c: Context,
@@ -100,7 +99,7 @@ export interface X402MiddlewareConfig {
 export function x402Middleware(config: X402MiddlewareConfig): MiddlewareHandler {
   return async (c, next) => {
     const paymentRequirements =
-      typeof config.paymentRequirements === "function" ? config.paymentRequirements(c) : config.paymentRequirements
+      typeof config.paymentRequirements === "function" ? await config.paymentRequirements(c) : config.paymentRequirements
 
     // 1. Check for X-PAYMENT header
     const payment = c.req.header("X-PAYMENT")

@@ -21,19 +21,26 @@ async function testPumpEndpoint() {
   console.log("🔗 Wrapping fetch with payment handler...")
   const fetchWithPayment = wrapFetchWithPayment(fetch, signer)
 
-  // Construct URL with query parameters
-  const url = new URL(`${API_URL}/api/pump`)
-  url.searchParams.set("amount", TEST_AMOUNT)
-  url.searchParams.set("network", TEST_TARGET_NETWORK)
-  url.searchParams.set("targetAddress", TEST_TARGET_ADDRESS)
+  const url = `${API_URL}/api/pump`
+  const requestBody = {
+    amount: TEST_AMOUNT,
+    network: TEST_TARGET_NETWORK,
+    targetAddress: TEST_TARGET_ADDRESS,
+  }
 
-  console.log(`📡 Calling ${url.toString()}...`)
+  console.log(`📡 Calling ${url}...`)
   console.log(`   Amount: $${TEST_AMOUNT} USDC`)
   console.log(`   Target Network: ${TEST_TARGET_NETWORK}`)
   console.log(`   Target Address: ${TEST_TARGET_ADDRESS}`)
   console.log("   (This will handle 402, sign payment, and retry automatically)")
 
-  const response = await fetchWithPayment(url.toString(), { method: "GET" })
+  const response = await fetchWithPayment(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody),
+  })
 
   console.log("\n✅ Response received!")
   console.log("   Status:", response.status, response.statusText)
