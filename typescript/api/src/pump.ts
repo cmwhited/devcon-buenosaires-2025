@@ -67,9 +67,7 @@ export function createProcessPumpPayment(x402Network: string, wallets: Wallets) 
   return async (c: Context, _payment: PaymentPayload, _requirement: PaymentRequirements): Promise<void> => {
     const { amount, network, targetAddress } = await extractPumpParams(c)
 
-    console.log(`Payment verified for ${amount} USDC`)
-    console.log(`Processing bridge to ${targetAddress} on ${network}`)
-
+    try {
     // 4.b. Swap USDC to ETH (mocked)
     console.log(`[MOCK] Swapping ${amount} USDC to ETH...`)
     await new Promise((resolve) => setTimeout(resolve, 100)) // Simulate async operation
@@ -77,9 +75,11 @@ export function createProcessPumpPayment(x402Network: string, wallets: Wallets) 
     console.log(`[MOCK] Swapped to ${ethAmount} ETH`)
 
     // 4.c. Bridge ETH to target chain (mocked)
-    console.log(`[MOCK] Bridging ${ethAmount} ETH to ${network}...`)
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    console.log(`[MOCK] Bridge initiated`)
+    if (network !== x402Network) {
+      console.log(`[MOCK] Bridging ${ethAmount} ETH to ${network}...`)
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      console.log(`[MOCK] Bridge initiated`)
+    }
 
     // 4.d. Transfer ETH to target address (REAL)
     const targetNetwork = network as SupportedNetwork
@@ -94,33 +94,38 @@ export function createProcessPumpPayment(x402Network: string, wallets: Wallets) 
     const txTransferReceipt = await sendEth(wallet.account, targetNetwork, targetAddress as `0x${string}`, ethAmountWei)
     console.log(`Transfer complete! Transaction hash: ${txTransferReceipt.transactionHash}`)
 
-    // Store operation data in context for later retrieval
-    const operationData: PumpOperationData = {
-      sourceNetwork: x402Network,
-      usdcAmount: amount,
-      ethAmount,
-      targetAddress,
-      targetNetwork,
-      transactions: {
-        swap: {
-          network: x402Network,
-          hash: "0xMOCKED_SWAP_TX",
-          status: "mocked",
+      // Store operation data in context for later retrieval
+      const operationData: PumpOperationData = {
+        sourceNetwork: x402Network,
+        usdcAmount: amount,
+        ethAmount,
+        targetAddress,
+        targetNetwork,
+        transactions: {
+          swap: {
+            network: x402Network,
+            hash: "0xMOCKED_SWAP_TX",
+            status: "mocked",
+          },
+          bridge: {
+            network: x402Network,
+            hash: "0xMOCKED_BRIDGE_TX",
+            status: "mocked",
+          },
+          transfer: {
+            network: targetNetwork,
+            hash: txTransferReceipt.transactionHash,
+            status: txTransferReceipt.status,
+          },
         },
-        bridge: {
-          network: x402Network,
-          hash: "0xMOCKED_BRIDGE_TX",
-          status: "mocked",
-        },
-        transfer: {
-          network: targetNetwork,
-          hash: txTransferReceipt.transactionHash,
-          status: txTransferReceipt.status,
-        },
-      },
-    }
+      }
+  
+      c.set("pumpOperation", operationData)
 
-    c.set("pumpOperation", operationData)
+    } catch (error) {
+      console.error("Error processing pump payment:", error)
+      throw error
+    }
   }
 }
 
@@ -145,10 +150,8 @@ export async function createPumpResponse(
     status: settlement.transactionHash ? "success" : "reverted",
   }
 
-  logPumpOperation(operationData)
-
   return c.json({
-    message: "Bridge operation completed successfully",
+    message: "Pump operation completed successfully",
     status: "success",
     ...operationData,
   })

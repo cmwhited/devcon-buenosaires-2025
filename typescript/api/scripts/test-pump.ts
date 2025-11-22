@@ -13,7 +13,7 @@ const NETWORK = process.env.X402_NETWORK || "polygon-amoy"
 
 // Test parameters
 const TEST_AMOUNT = "0.05" // $0.05 USDC
-const TEST_TARGET_NETWORK = "base-sepolia"
+const TEST_TARGET_NETWORK = process.env.TEST_TARGET_NETWORK || "base-sepolia"
 
 async function testPumpEndpoint() {
   console.log("🔐 Creating signer for", NETWORK)

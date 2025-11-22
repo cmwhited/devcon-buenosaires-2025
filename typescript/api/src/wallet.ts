@@ -45,17 +45,15 @@ export async function sendEth(
 ): Promise<TransactionReceipt> {
   const publicClient = getRpcClient(network)
 
-  const transactionResult = await cdp.evm.sendTransaction({
-    address: account.address,
+  const tx = await account.sendTransaction({
     transaction: {
-      to,
+      to: to,
       value: amount,
     },
     network: network as any,
   })
-
   const txReceipt = await publicClient.waitForTransactionReceipt({
-    hash: transactionResult.transactionHash,
+    hash: tx.transactionHash,
   })
   return txReceipt
 }
