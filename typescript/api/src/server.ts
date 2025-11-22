@@ -9,18 +9,23 @@ import { secureHeaders } from "hono/secure-headers"
 import { formatEther } from "viem"
 
 import { env } from "./env/server.ts"
-import { createPumpPaymentRequirements, createPumpResponse, processPumpPayment } from "./pump.ts"
-import { getWallet } from "./wallet.ts"
+import { createProcessPumpPayment, createPumpPaymentRequirements, createPumpResponse, PumpOperationData } from "./pump.ts"
+import { getWallets } from "./wallet.ts"
 import { x402Middleware } from "./x402.ts"
 
 interface ApiContext extends Env {
-  Variables: Record<string, never>
+  Variables: {
+    pumpOperation?: PumpOperationData
+  }
 }
 
-const app = new Hono<ApiContext>()
-const wallet = await getWallet("base-sepolia")
-console.log(`retrieved CDP account: ${wallet.account.address}, balance: ${formatEther(wallet.balance)} ETH`)
+const wallets = await getWallets()
+for (const [network, wallet] of Object.entries(wallets)) {
+  console.log(`[${network}] CDP account: ${wallet.account.address}, balance: ${formatEther(wallet.balance)} ETH`)
+}
+const x402PayToAddress = wallets["base-sepolia"].account.address
 
+const app = new Hono<ApiContext>()
 app.use(logger())
 app.use(prettyJSON())
 app.use("*", requestId())
@@ -40,8 +45,8 @@ app.get("/", (c) => c.json({ status: "OK" }))
 app.post(
   "/api/pump",
   x402Middleware({
-    paymentRequirements: (c) => createPumpPaymentRequirements(c, wallet.account.address, env.X402_NETWORK),
-    onVerified: processPumpPayment,
+    paymentRequirements: (c) => createPumpPaymentRequirements(c, x402PayToAddress, env.X402_NETWORK),
+    onVerified: createProcessPumpPayment(env.X402_NETWORK, wallets),
     onSettle: createPumpResponse,
   }),
 )

@@ -1,5 +1,5 @@
 import { CdpClient, EvmServerAccount } from "@coinbase/cdp-sdk"
-import { parseEther } from "viem"
+import { parseEther, TransactionReceipt } from "viem"
 
 import { env } from "./env/server.ts"
 import { SUPPORTED_NETWORKS, SupportedNetwork } from "./networks.ts"
@@ -15,13 +15,25 @@ const cdp = new CdpClient({
   walletSecret: env.CDP_WALLET_SECRET,
 })
 
+export type WalletInfo = { account: EvmServerAccount; balance: bigint }
+export type Wallets = Record<SupportedNetwork, WalletInfo>
+
+export async function getWallets(): Promise<Wallets> {
+  const wallets: Wallets = {} as Wallets
+  for (const network of SUPPORTED_NETWORKS) {
+    const wallet = await getWallet(network)
+    wallets[network] = wallet
+  }
+  return wallets
+}
+
 export async function getWallet(network: SupportedNetwork): Promise<{ account: EvmServerAccount; balance: bigint }> {
   const publicClient = getRpcClient(network)
   const account = await cdp.evm.createAccount({
     name: CDP_ACCOUNT_NAME,
     idempotencyKey: CDP_ACCOUNT_IDEMPOTENCY_KEY,
   })
-
+  // account = await account.useNetwork("base")
   let balance = await getEthBalance(account, network)
 
   if (SUPPORTED_NETWORKS.includes(network) && balance < MIN_BALANCE_THRESHOLD) {
@@ -44,7 +56,7 @@ export async function sendEth(
   network: SupportedNetwork,
   to: `0x${string}`,
   amount: bigint,
-): Promise<string> {
+): Promise<TransactionReceipt> {
   const publicClient = getRpcClient(network)
 
   const transactionResult = await cdp.evm.sendTransaction({
@@ -59,7 +71,7 @@ export async function sendEth(
   const txReceipt = await publicClient.waitForTransactionReceipt({
     hash: transactionResult.transactionHash,
   })
-  return txReceipt.status
+  return txReceipt
 }
 
 async function getEthBalance(account: EvmServerAccount, network: SupportedNetwork): Promise<bigint> {
