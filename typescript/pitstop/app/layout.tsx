@@ -36,8 +36,10 @@ export default async function RootLayout({
   const initialState = cookieToInitialState(wagmiConfig, _cookies)
 
   return (
-    <html lang="en" className="m-0 flex h-full min-h-screen w-full flex-col p-0">
-      <body className={`${anton.variable} ${spaceMono.variable} h-full w-full font-mono antialiased`}>
+    <html lang="en" className="m-0 flex h-full min-h-screen w-full flex-col pb-56">
+      <body
+        className={`${anton.variable} ${spaceMono.variable} h-full w-full bg-[url(/images/background.png)] bg-cover bg-top-left bg-no-repeat bg-origin-border pb-56 font-mono antialiased`}
+      >
         <Providers initialState={initialState}>{children}</Providers>
       </body>
     </html>

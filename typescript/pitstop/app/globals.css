@@ -3,6 +3,8 @@
 @theme inline {
   --font-sans: var(--font-anton);
   --font-mono: var(--font-space-mono);
+  --dirty-white: #f5f5dc;
+  --bg-oilcan: linear-gradient(180deg, #3c2414 0%, #1f1206 50%, #2a1a0c 100%);
 
   @keyframes flicker {
     0%,

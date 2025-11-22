@@ -1,5 +1,4 @@
-import type { Hex } from "x402-fetch"
-import { createSigner, decodeXPaymentResponse, wrapFetchWithPayment } from "x402-fetch"
+import { createSigner, decodeXPaymentResponse, type Hex, wrapFetchWithPayment } from "x402-fetch"
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY as Hex
 const API_URL = process.env.API_URL || "http://localhost:4000/api/hello"
