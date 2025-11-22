@@ -11,7 +11,8 @@
     "lint": "pnpm --recursive --parallel --filter \"./typescript/*\" run lint",
     "lint:fix": "pnpm --recursive --parallel --filter \"./typescript/*\" run lint:fix",
     "typecheck": "pnpm --recursive --parallel --filter \"./typescript/*\" run typecheck",
-    "check": "pnpm run typecheck; pnpm run lint; pnpm run format"
+    "check": "pnpm run typecheck; pnpm run lint; pnpm run format",
+    "test:hello": "tsx typescript/api/scripts/test-hello.ts"
   },
   "keywords": [
     "DeFi",
