@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-anton);
+  --font-mono: var(--font-space-mono);
+  --dirty-white: #f5f5dc;
+  --bg-oilcan: linear-gradient(180deg, #3c2414 0%, #1f1206 50%, #2a1a0c 100%);
+
+  @keyframes flicker {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    92% {
+      opacity: 0.9;
+    }
+    95% {
+      opacity: 0.7;
+    }
+  }
+
+  --animate-flicker: flicker 3s infinite;
+}
