@@ -12,7 +12,8 @@
     "lint:fix": "pnpm --recursive --parallel --filter \"./typescript/*\" run lint:fix",
     "typecheck": "pnpm --recursive --parallel --filter \"./typescript/*\" run typecheck",
     "check": "pnpm run typecheck; pnpm run lint; pnpm run format",
-    "test:hello": "tsx typescript/api/scripts/test-hello.ts"
+    "test:hello": "tsx typescript/api/scripts/test-hello.ts",
+    "amp": "amp"
   },
   "keywords": [
     "DeFi",
@@ -38,12 +39,22 @@
     "typescript-eslint": "8.47.0"
   },
   "dependencies": {
+    "@edgeandnode/amp": "^0.0.51",
     "dotenv": "^17.2.3",
     "viem": "^2.39.3"
   },
   "pnpm": {
     "overrides": {
       "@walletconnect/logger>pino": "10.1.0"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@reown/appkit",
+      "bufferutil",
+      "core-js-pure",
+      "esbuild",
+      "msgpackr-extract",
+      "utf-8-validate"
+    ]
   }
 }
