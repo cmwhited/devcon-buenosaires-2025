@@ -15,6 +15,7 @@ import {
   createPumpResponse,
   PumpOperationData,
 } from "./pump.ts"
+import { logServerBoot } from "./utils.ts"
 import { getWallets } from "./wallet.ts"
 import { x402Middleware } from "./x402.ts"
 
@@ -24,10 +25,15 @@ interface ApiContext extends Env {
   }
 }
 
+logServerBoot()
+
 const wallets = await getWallets()
+console.log("server wallet balances:")
 for (const [network, wallet] of Object.entries(wallets)) {
-  console.log(`[${network}] CDP account: ${wallet.account.address}, balance: ${formatEther(wallet.balance)} ETH`)
+  console.log(`- [${network}] CDP account: ${wallet.account.address}, balance: ${formatEther(wallet.balance)} ETH`)
 }
+console.log("\n")
+
 const x402PayToAddress = wallets["base-sepolia"].account.address
 
 const app = new Hono<ApiContext>()

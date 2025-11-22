@@ -1,5 +1,5 @@
 import { Chain, createPublicClient, http, PublicClient } from "viem"
-import { baseSepolia, sepolia } from "viem/chains"
+import { baseSepolia, polygonAmoy, sepolia } from "viem/chains"
 
 import { SupportedNetwork } from "./networks.ts"
 
@@ -9,6 +9,8 @@ function getChain(network: SupportedNetwork): Chain {
       return baseSepolia
     case "sepolia":
       return sepolia
+    case "polygon-amoy":
+      return polygonAmoy
     default:
       throw new Error(`Unsupported network: ${network}`)
   }
