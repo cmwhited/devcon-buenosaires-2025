@@ -18,6 +18,15 @@
   --shadow-industrial-sm: 2px 2px 0 #000000, 3px 3px 8px rgba(0,0,0,0.3);
   --shadow-inset-industrial: inset 0 2px 4px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(255,255,255,0.05);
 
+  /* Status colors */
+  --color-status-success: #00FF41;
+  --color-status-pending: #FFD700;
+  --color-status-failed: #FF6B35;
+  
+  /* Table specific */
+  --color-row-hover: #1a1a1a;
+  --color-row-border: #333333;
+
   @keyframes flicker {
     0%,
     100% {
