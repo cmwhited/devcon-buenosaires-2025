@@ -3,9 +3,9 @@ import { parseEther } from "viem"
 import type { Network, PaymentPayload, PaymentRequirements, Resource } from "x402/types"
 
 import { SupportedNetwork } from "./networks.ts"
+import { logPumpOperation } from "./utils.ts"
 import { sendEth, Wallets } from "./wallet.ts"
 import { createExactPaymentRequirements } from "./x402.ts"
-import { logPumpOperation } from "./utils.ts"
 
 interface PumpRequest {
   amount: string
@@ -58,7 +58,7 @@ export async function createPumpPaymentRequirements(
       x402Network as Network,
       resource,
       payToAddress,
-      `Bridge ${amount} USDC to ${targetAddress} on ${network}`,
+      `Pump ${amount} USDC to ${targetAddress} on ${network}`,
     ),
   ]
 }
