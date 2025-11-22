@@ -11,6 +11,9 @@ export const env = createEnv({
     PRIVY_APP_SECRET: z.string().min(1),
     X402_PAY_TO_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
     X402_NETWORK: z.enum(["base", "base-sepolia", "polygon-amoy"]).default("polygon-amoy"),
+    CDP_API_KEY_ID: z.string().min(1),
+    CDP_API_KEY_SECRET: z.string().min(1),
+    CDP_WALLET_SECRET: z.string().min(1),
   },
   runtimeEnv: process.env,
 })

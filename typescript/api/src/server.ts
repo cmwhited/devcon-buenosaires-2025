@@ -13,9 +13,11 @@ import { findMatchingPaymentRequirements, processPriceToAtomicAmount } from "x40
 import type { Network, PaymentPayload, PaymentRequirements, Price, Resource } from "x402/types"
 import { settleResponseHeader } from "x402/types"
 import { useFacilitator } from "x402/verify"
+import { formatEther } from "viem"
 
 import { authClient } from "./auth.ts"
 import { env } from "./env/server.ts"
+import { getWallet } from "./wallet.ts"
 
 interface ApiContext extends Env {
   Variables: {
@@ -25,6 +27,8 @@ interface ApiContext extends Env {
 }
 
 const app = new Hono<ApiContext>()
+const wallet = await getWallet("base-sepolia")
+console.log(`retrieved CDP account: ${wallet.account.address}, balance: ${formatEther(wallet.balance)} ETH`)
 
 // Initialize x402 facilitator
 const { verify, settle } = useFacilitator({
@@ -112,12 +116,7 @@ app.get("/api/hello", async (c) => {
   // 2. Create payment requirements
   const resource = c.req.url as Resource
   const paymentRequirements = [
-    createExactPaymentRequirements(
-      `$${randomPrice}`,
-      env.X402_NETWORK,
-      resource,
-      "Access to hello world endpoint",
-    ),
+    createExactPaymentRequirements(`$${randomPrice}`, env.X402_NETWORK, resource, "Access to hello world endpoint"),
   ]
 
   // 3. Check for X-PAYMENT header
@@ -151,8 +150,7 @@ app.get("/api/hello", async (c) => {
 
   // 5. Verify payment
   const selectedPaymentRequirement =
-    findMatchingPaymentRequirements(paymentRequirements, decodedPayment) ||
-    paymentRequirements[0]
+    findMatchingPaymentRequirements(paymentRequirements, decodedPayment) || paymentRequirements[0]
 
   const verification = await verify(decodedPayment, selectedPaymentRequirement)
   if (!verification.isValid) {
