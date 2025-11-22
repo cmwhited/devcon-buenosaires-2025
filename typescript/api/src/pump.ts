@@ -1,12 +1,31 @@
 import { Context } from "hono"
+import { parseEther } from "viem"
 import type { Network, PaymentPayload, PaymentRequirements, Resource } from "x402/types"
 
+import { SupportedNetwork } from "./networks.ts"
+import { logPumpOperation } from "./utils.ts"
+import { sendEth, Wallets } from "./wallet.ts"
 import { createExactPaymentRequirements } from "./x402.ts"
 
 interface PumpRequest {
   amount: string
   network: string
   targetAddress: string
+}
+
+export interface PumpOperationData {
+  sourceAddress?: string
+  sourceNetwork: string
+  targetAddress: string
+  targetNetwork: string
+  usdcAmount: string
+  ethAmount: number
+  transactions: {
+    swap: { network: string; hash: string; status: string }
+    bridge: { network: string; hash: string; status: string }
+    transfer: { network: string; hash: string; status: string }
+    settlement?: { network: string; hash: string; status: string }
+  }
 }
 
 async function extractPumpParams(c: Context): Promise<PumpRequest> {
@@ -39,36 +58,70 @@ export async function createPumpPaymentRequirements(
       x402Network as Network,
       resource,
       payToAddress,
-      `Bridge ${amount} USDC to ${targetAddress} on ${network}`,
+      `Pump ${amount} USDC to ${targetAddress} on ${network}`,
     ),
   ]
 }
 
-export async function processPumpPayment(
-  c: Context,
-  _payment: PaymentPayload,
-  _requirement: PaymentRequirements,
-): Promise<void> {
-  const { amount, network, targetAddress } = await extractPumpParams(c)
+export function createProcessPumpPayment(x402Network: string, wallets: Wallets) {
+  return async (c: Context, _payment: PaymentPayload, _requirement: PaymentRequirements): Promise<void> => {
+    const { amount, network, targetAddress } = await extractPumpParams(c)
 
-  console.log(`Payment verified for ${amount} USDC`)
-  console.log(`Processing bridge to ${targetAddress} on ${network}`)
+    console.log(`Payment verified for ${amount} USDC`)
+    console.log(`Processing bridge to ${targetAddress} on ${network}`)
 
-  // 4.b. Swap USDC to ETH (mocked)
-  console.log(`[MOCK] Swapping ${amount} USDC to ETH...`)
-  await new Promise((resolve) => setTimeout(resolve, 100)) // Simulate async operation
-  const ethAmount = parseFloat(amount) * 0.0003 // Mock conversion rate
-  console.log(`[MOCK] Swapped to ${ethAmount} ETH`)
+    // 4.b. Swap USDC to ETH (mocked)
+    console.log(`[MOCK] Swapping ${amount} USDC to ETH...`)
+    await new Promise((resolve) => setTimeout(resolve, 100)) // Simulate async operation
+    const ethAmount = parseFloat(amount) * 0.0003 // Mock conversion rate
+    console.log(`[MOCK] Swapped to ${ethAmount} ETH`)
 
-  // 4.c. Bridge ETH to target chain (mocked)
-  console.log(`[MOCK] Bridging ${ethAmount} ETH to ${network}...`)
-  await new Promise((resolve) => setTimeout(resolve, 100))
-  console.log(`[MOCK] Bridge initiated`)
+    // 4.c. Bridge ETH to target chain (mocked)
+    console.log(`[MOCK] Bridging ${ethAmount} ETH to ${network}...`)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    console.log(`[MOCK] Bridge initiated`)
 
-  // 4.d. Transfer ETH to target address (mocked)
-  console.log(`[MOCK] Transferring ${ethAmount} ETH to ${targetAddress} on ${network}...`)
-  await new Promise((resolve) => setTimeout(resolve, 100))
-  console.log(`[MOCK] Transfer complete`)
+    // 4.d. Transfer ETH to target address (REAL)
+    const targetNetwork = network as SupportedNetwork
+    const wallet = wallets[targetNetwork]
+
+    if (!wallet) {
+      throw new Error(`Wallet not found for network: ${targetNetwork}`)
+    }
+
+    const ethAmountWei = parseEther(ethAmount.toString())
+    console.log(`Transferring ${ethAmount} ETH to ${targetAddress} on ${targetNetwork}...`)
+    const txTransferReceipt = await sendEth(wallet.account, targetNetwork, targetAddress as `0x${string}`, ethAmountWei)
+    console.log(`Transfer complete! Transaction hash: ${txTransferReceipt.transactionHash}`)
+
+    // Store operation data in context for later retrieval
+    const operationData: PumpOperationData = {
+      sourceNetwork: x402Network,
+      usdcAmount: amount,
+      ethAmount,
+      targetAddress,
+      targetNetwork,
+      transactions: {
+        swap: {
+          network: x402Network,
+          hash: "0xMOCKED_SWAP_TX",
+          status: "mocked",
+        },
+        bridge: {
+          network: x402Network,
+          hash: "0xMOCKED_BRIDGE_TX",
+          status: "mocked",
+        },
+        transfer: {
+          network: targetNetwork,
+          hash: txTransferReceipt.transactionHash,
+          status: txTransferReceipt.status,
+        },
+      },
+    }
+
+    c.set("pumpOperation", operationData)
+  }
 }
 
 export async function createPumpResponse(
@@ -77,19 +130,26 @@ export async function createPumpResponse(
   _requirement: PaymentRequirements,
   settlement: { transactionHash: string; payer: string },
 ) {
-  const { amount, network, targetAddress } = await extractPumpParams(c)
+  // Retrieve operation data from context
+  const operationData = c.get("pumpOperation") as PumpOperationData | undefined
 
-  console.log(`Payment settled - Transaction: ${settlement.transactionHash}`)
-  console.log(`Payer: ${settlement.payer}`)
-  console.log(`Bridge to ${targetAddress} on ${network} completed for ${amount} USDC`)
+  if (!operationData) {
+    throw new Error("Operation data not found in context")
+  }
+
+  // Add settlement to operation data
+  operationData.sourceAddress = settlement.payer
+  operationData.transactions.settlement = {
+    network: operationData.targetNetwork,
+    hash: settlement.transactionHash,
+    status: settlement.transactionHash ? "success" : "reverted",
+  }
+
+  logPumpOperation(operationData)
 
   return c.json({
-    message: "Bridge operation completed",
-    amount,
-    targetAddress,
-    targetNetwork: network,
-    settlementTx: settlement.transactionHash,
-    payer: settlement.payer,
+    message: "Bridge operation completed successfully",
     status: "success",
+    ...operationData,
   })
 }
