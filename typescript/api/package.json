@@ -1,0 +1,26 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "API layer for creating server-wallets, and performing transactions",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm tsx ./src/server.ts --watch",
+    "build": "tsdown",
+    "start": "node ./dist/server.mjs",
+    "format": "prettier . --write --list-different --ignore-path ../../.prettierignore",
+    "format:check": "prettier . --check --ignore-path ../../.prettierignore",
+    "lint": "eslint \"**/src/**/*.{ts,mjs}\"",
+    "lint:fix": "pnpm lint --fix",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm run typecheck; pnpm run lint; pnpm run format"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "@t3-oss/env-core": "^0.13.8",
+    "fastify": "^5.6.2",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "tsdown": "^0.16.6"
+  }
+}
