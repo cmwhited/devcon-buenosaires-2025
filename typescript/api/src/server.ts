@@ -1,15 +1,31 @@
 import { serve } from "@hono/node-server"
-import { Hono } from "hono"
+import { AuthTokenClaims } from "@privy-io/server-auth"
+import { Env, Hono } from "hono"
+import { bearerAuth } from "hono/bearer-auth"
+import { contextStorage, getContext } from "hono/context-storage"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
 import { prettyJSON } from "hono/pretty-json"
+import { requestId } from "hono/request-id"
+import { secureHeaders } from "hono/secure-headers"
 
+import { authClient } from "./auth.ts"
 import { env } from "./env/server.ts"
 
-const app = new Hono()
+interface ApiContext extends Env {
+  Variables: {
+    claims: AuthTokenClaims | null
+    user: string | null
+  }
+}
+
+const app = new Hono<ApiContext>()
 
 app.use(logger())
 app.use(prettyJSON())
+app.use("*", requestId()) // applies a request id to all downstream requests
+app.use(secureHeaders())
+app.use(contextStorage())
 app.use(
   "/api/*",
   cors({
@@ -19,6 +35,31 @@ app.use(
   }),
 )
 app.get("/", (c) => c.json({ status: "OK" }))
+app.get(
+  "/api/protected",
+  bearerAuth({
+    async verifyToken(token, c) {
+      return await authClient
+        .verifyAuthTokenAndFetchUser(token)
+        .then(({ claims, user }) => {
+          // set claims on request context
+          c.set("claims", claims)
+          c.set("user", authClient.fetchUserAddress(user))
+
+          return true
+        })
+        .catch((err) => {
+          console.warn("failure verifying auth bearer token", err)
+          return false
+        })
+    },
+  }),
+  (c) => {
+    const user = getContext<ApiContext>().var.user
+
+    return c.json({ protected: "SAFE", user })
+  },
+)
 
 const server = serve({
   fetch: app.fetch,
