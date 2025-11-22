@@ -27,6 +27,8 @@ interface ApiContext extends Env {
 }
 
 const app = new Hono<ApiContext>()
+const wallet = await getWallet("base-sepolia")
+console.log(`retrieved CDP account: ${wallet.account.address}, balance: ${formatEther(wallet.balance)} ETH`)
 
 // Initialize x402 facilitator
 const { verify, settle } = useFacilitator({
@@ -198,6 +200,8 @@ const server = serve({
   fetch: app.fetch,
   port: env.API_PORT,
 })
+
+
 
 server.once("listening", () => {
   console.log("api initialized and running on", env.API_PORT)
