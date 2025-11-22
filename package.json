@@ -36,6 +36,7 @@
     "typescript-eslint": "8.47.0"
   },
   "dependencies": {
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "viem": "^2.39.3"
   }
 }
