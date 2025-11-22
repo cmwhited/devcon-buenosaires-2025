@@ -10,6 +10,7 @@ import { formatEther } from "viem"
 
 import { env } from "./env/server.ts"
 import { x402Middleware } from "./middleware.ts"
+import { runGasStationCheck } from "./gas-station.ts"
 import {
   createProcessPumpPayment,
   createPumpPaymentRequirements,
@@ -71,6 +72,18 @@ app.post("/api/quote", async (c) => {
   } catch (error) {
     return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 400)
   }
+})
+
+app.post("/api/gas-station/refill", async (c) => {
+  // Fire and forget - don't await the gas station check
+  runGasStationCheck().catch((error) => {
+    console.error("[GAS-STATION] Background check failed:", error)
+  })
+
+  return c.json({
+    status: "triggered",
+    message: "Gas station check running in background",
+  })
 })
 
 const server = serve({
