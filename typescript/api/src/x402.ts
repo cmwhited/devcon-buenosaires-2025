@@ -120,7 +120,6 @@ export function x402Middleware(config: X402MiddlewareConfig): MiddlewareHandler 
     let decodedPayment: PaymentPayload
     try {
       decodedPayment = decodePayment(payment)
-      console.log("Decoded payment:", JSON.stringify(decodedPayment, null, 2))
     } catch (error) {
       console.error("Payment decode error:", error)
       return c.json(
