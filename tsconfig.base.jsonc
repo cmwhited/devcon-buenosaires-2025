@@ -36,7 +36,8 @@
     "baseUrl": ".",
     "incremental": true,
     "removeComments": false,
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
-    "paths": {}
-  }
+    "paths": {},
+  },
 }
