@@ -116,12 +116,7 @@ app.get("/api/hello", async (c) => {
   // 2. Create payment requirements
   const resource = c.req.url as Resource
   const paymentRequirements = [
-    createExactPaymentRequirements(
-      `$${randomPrice}`,
-      env.X402_NETWORK,
-      resource,
-      "Access to hello world endpoint",
-    ),
+    createExactPaymentRequirements(`$${randomPrice}`, env.X402_NETWORK, resource, "Access to hello world endpoint"),
   ]
 
   // 3. Check for X-PAYMENT header
@@ -155,8 +150,7 @@ app.get("/api/hello", async (c) => {
 
   // 5. Verify payment
   const selectedPaymentRequirement =
-    findMatchingPaymentRequirements(paymentRequirements, decodedPayment) ||
-    paymentRequirements[0]
+    findMatchingPaymentRequirements(paymentRequirements, decodedPayment) || paymentRequirements[0]
 
   const verification = await verify(decodedPayment, selectedPaymentRequirement)
   if (!verification.isValid) {
@@ -200,8 +194,6 @@ const server = serve({
   fetch: app.fetch,
   port: env.API_PORT,
 })
-
-
 
 server.once("listening", () => {
   console.log("api initialized and running on", env.API_PORT)
