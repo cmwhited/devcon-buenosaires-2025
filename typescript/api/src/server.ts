@@ -13,9 +13,11 @@ import { findMatchingPaymentRequirements, processPriceToAtomicAmount } from "x40
 import type { Network, PaymentPayload, PaymentRequirements, Price, Resource } from "x402/types"
 import { settleResponseHeader } from "x402/types"
 import { useFacilitator } from "x402/verify"
+import { formatEther } from "viem"
 
 import { authClient } from "./auth.ts"
 import { env } from "./env/server.ts"
+import { getWallet } from "./wallet.ts"
 
 interface ApiContext extends Env {
   Variables: {
