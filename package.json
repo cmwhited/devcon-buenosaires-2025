@@ -38,5 +38,10 @@
   "dependencies": {
     "dotenv": "^17.2.3",
     "viem": "^2.39.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@walletconnect/logger>pino": "10.1.0"
+    }
   }
 }
