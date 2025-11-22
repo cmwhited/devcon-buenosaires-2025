@@ -17,38 +17,41 @@ export function logPumpOperation(operation: PumpOperationData) {
 }
 
 export function logServerBoot() {
-  console.clear();
+  console.clear()
 
-  console.log("%c====================================================",
-    "color:#0ff; font-size:12px");
-  console.log("%c      ⛽🚀  GAS STATION ONLINE  🚀⛽",
-    "color:#fff; background:#ff0066; font-size:22px; padding:8px 16px; font-weight:bold;");
-  console.log("%c====================================================\n",
-    "color:#0ff; font-size:12px");
+  console.log("%c====================================================", "color:#0ff; font-size:12px")
+  console.log(
+    "%c      ⛽🚀  GAS STATION ONLINE  🚀⛽",
+    "color:#fff; background:#ff0066; font-size:22px; padding:8px 16px; font-weight:bold;",
+  )
+  console.log("%c====================================================\n", "color:#0ff; font-size:12px")
 
   // Boot Stage 1
-  console.log("%c🔧 Igniting cross-chain engines…",
-    "color:#00eaff; font-size:16px; font-weight:bold;");
+  console.log("%c🔧 Igniting cross-chain engines…", "color:#00eaff; font-size:16px; font-weight:bold;")
 
   // Boot Stage 2
-  console.log("%c🛢️ Loading gas barrels into the pipeline…",
-    "color:#ffcc00; font-size:16px; font-weight:bold;");
+  console.log("%c🛢️ Loading gas barrels into the pipeline…", "color:#ffcc00; font-size:16px; font-weight:bold;")
 
   // Boot Stage 3
-  console.log("%c🌉 Activating bridge conduits…",
-    "color:#9d4dff; font-size:16px; font-weight:bold;");
+  console.log("%c🌉 Activating bridge conduits…", "color:#9d4dff; font-size:16px; font-weight:bold;")
 
   // Boot Stage 4
-  console.log("%c🚨 Pressurizing gas pumps…",
-    "color:#ff4444; font-size:18px; font-weight:bold; text-shadow:1px 1px #000;");
+  console.log(
+    "%c🚨 Pressurizing gas pumps…",
+    "color:#ff4444; font-size:18px; font-weight:bold; text-shadow:1px 1px #000;",
+  )
 
   // FINAL ACTIVATION
-  console.log("%c🔥 ALL SYSTEMS GO — READY TO PUMP GAS ACROSS THE MULTICHAIN 🔥",
-    "background:linear-gradient(to right, #ff0066, #ff9900); color:white; font-size:20px; padding:10px 14px; font-weight:bold; border-radius:6px;");
+  console.log(
+    "%c🔥 ALL SYSTEMS GO — READY TO PUMP GAS ACROSS THE MULTICHAIN 🔥",
+    "background:linear-gradient(to right, #ff0066, #ff9900); color:white; font-size:20px; padding:10px 14px; font-weight:bold; border-radius:6px;",
+  )
 
   // Tagline
-  console.log("%c⛽ Serving premium, unleaded, cross-chain liquidity since block zero.",
-    "color:#0ff; font-size:14px; font-style:italic; margin-top:12px;");
+  console.log(
+    "%c⛽ Serving premium, unleaded, cross-chain liquidity since block zero.",
+    "color:#0ff; font-size:14px; font-style:italic; margin-top:12px;",
+  )
 
   console.log("\n")
 }
