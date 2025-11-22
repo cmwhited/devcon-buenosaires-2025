@@ -17,6 +17,8 @@
     "check": "pnpm run typecheck; pnpm run lint; pnpm run format"
   },
   "dependencies": {
+    "@circle-fin/adapter-viem-v2": "^1.1.1",
+    "@circle-fin/bridge-kit": "^1.1.2",
     "@coinbase/cdp-sdk": "^1.38.6",
     "@fastify/cors": "^11.1.0",
     "@hono/node-server": "^1.19.6",
