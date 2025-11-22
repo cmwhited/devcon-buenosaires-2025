@@ -1,0 +1,11 @@
+dist/
+.next/
+coverage/
+pnpm-lock.yaml
+CHANGELOG.md
+*.generated.*
+*.typegen.*
+.tsbuildinfo
+.tsbuildinfo/
+*dist/
+**/target/

@@ -1,0 +1,8 @@
+{
+  "singleQuote": false,
+  "printWidth": 120,
+  "semi": false,
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindPreserveWhitespace": true,
+  "tailwindFunctions": ["classNames"]
+}
