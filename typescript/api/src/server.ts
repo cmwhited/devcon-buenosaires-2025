@@ -1,5 +1,4 @@
 import { serve } from "@hono/node-server"
-import { AuthTokenClaims } from "@privy-io/server-auth"
 import { Env, Hono } from "hono"
 import { contextStorage } from "hono/context-storage"
 import { cors } from "hono/cors"
@@ -8,17 +7,14 @@ import { prettyJSON } from "hono/pretty-json"
 import { requestId } from "hono/request-id"
 import { secureHeaders } from "hono/secure-headers"
 import { formatEther } from "viem"
-import { type Resource, settleResponseHeader } from "x402/types"
+import type { Resource } from "x402/types"
 
 import { env } from "./env/server.ts"
 import { getWallet } from "./wallet.ts"
-import { createExactPaymentRequirements, decodePayment, settlePayment, verifyPayment, x402Version } from "./x402.ts"
+import { createExactPaymentRequirements, x402Middleware } from "./x402.ts"
 
 interface ApiContext extends Env {
-  Variables: {
-    claims: AuthTokenClaims | null
-    user: string | null
-  }
+  Variables: Record<string, never>
 }
 
 const app = new Hono<ApiContext>()
@@ -41,82 +37,75 @@ app.use(
 )
 app.get("/", (c) => c.json({ status: "OK" }))
 
-app.get("/api/hello", async (c) => {
-  // 1. Generate random price between $0.001 and $0.005
-  const randomPrice = (Math.random() * (0.005 - 0.001) + 0.001).toFixed(3)
+app.get(
+  "/api/pump",
+  x402Middleware({
+    paymentRequirements: (c) => {
+      const amount = c.req.query("amount")
+      const targetNetwork = c.req.query("network")
+      const targetAddress = c.req.query("targetAddress")
 
-  // 2. Create payment requirements
-  const resource = c.req.url as Resource
-  const paymentRequirements = [
-    createExactPaymentRequirements(`$${randomPrice}`, env.X402_NETWORK, resource, "Access to hello world endpoint"),
-  ]
+      if (!amount || !targetNetwork || !targetAddress) {
+        throw new Error("Missing required parameters: amount, network, targetAddress")
+      }
 
-  // 3. Check for X-PAYMENT header
-  const payment = c.req.header("X-PAYMENT")
-  if (!payment) {
-    return c.json(
-      {
-        error: "X-PAYMENT header is required",
-        accepts: paymentRequirements,
-        x402Version,
-      },
-      402,
-    )
-  }
+      const resource = c.req.url as Resource
+      return [
+        createExactPaymentRequirements(
+          `$${amount}`,
+          env.X402_NETWORK,
+          resource,
+          wallet.account.address,
+          `Bridge ${amount} USDC to ${targetAddress} on ${targetNetwork}`,
+        ),
+      ]
+    },
+    onVerified: async (c, _payment, _requirement) => {
+      const amount = c.req.query("amount")!
+      const targetNetwork = c.req.query("network")!
+      const targetAddress = c.req.query("targetAddress")!
 
-  // 4. Decode payment
-  let decodedPayment
-  try {
-    decodedPayment = decodePayment(payment)
-  } catch (error) {
-    return c.json(
-      {
-        error: error instanceof Error ? error.message : "Invalid or malformed payment header",
-        accepts: paymentRequirements,
-        x402Version,
-      },
-      402,
-    )
-  }
+      console.log(`Payment verified for ${amount} USDC`)
+      console.log(`Processing bridge to ${targetAddress} on ${targetNetwork}`)
 
-  // 5. Verify payment
-  const { verification, selectedPaymentRequirement } = await verifyPayment(decodedPayment, paymentRequirements)
-  if (!verification.isValid) {
-    return c.json(
-      {
-        error: verification.invalidReason ?? "Could not determine invalid reason",
-        accepts: paymentRequirements,
-        payer: verification.payer,
-        x402Version,
-      },
-      402,
-    )
-  }
+      // 4.b. Swap USDC to ETH (mocked)
+      console.log(`[MOCK] Swapping ${amount} USDC to ETH...`)
+      await new Promise((resolve) => setTimeout(resolve, 100)) // Simulate async operation
+      const ethAmount = parseFloat(amount) * 0.0003 // Mock conversion rate
+      console.log(`[MOCK] Swapped to ${ethAmount} ETH`)
 
-  // 6. Settle payment
-  try {
-    const settlement = await settlePayment(decodedPayment, selectedPaymentRequirement)
-    if (!settlement.success) {
-      throw new Error(settlement.errorReason)
-    }
+      // 4.c. Bridge ETH to target chain (mocked)
+      console.log(`[MOCK] Bridging ${ethAmount} ETH to ${targetNetwork}...`)
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      console.log(`[MOCK] Bridge initiated`)
 
-    // 7. Set response header
-    const responseHeader = settleResponseHeader(settlement)
-    c.header("X-PAYMENT-RESPONSE", responseHeader)
+      // 4.d. Transfer ETH to target address (mocked)
+      console.log(`[MOCK] Transferring ${ethAmount} ETH to ${targetAddress} on ${targetNetwork}...`)
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      console.log(`[MOCK] Transfer complete`)
+    },
+    onSettle: async (c, _payment, _requirement, settlement) => {
+      const amount = c.req.query("amount")!
+      const targetNetwork = c.req.query("network")!
+      const targetAddress = c.req.query("targetAddress")!
 
-    // 8. Return success
-    return c.json({ message: "hello world" })
-  } catch (error) {
-    return c.json(
-      {
-        error: error instanceof Error ? error.message : "Failed to settle payment",
-        accepts: paymentRequirements,
-        x402Version,
-      },
-      402,
-    )
-  }
-})
+      console.log(`Payment settled - Transaction: ${settlement.transactionHash}`)
+      console.log(`Payer: ${settlement.payer}`)
+      console.log(`Bridge to ${targetAddress} on ${targetNetwork} completed for ${amount} USDC`)
+
+      // Return response to user
+      return c.json({
+        message: "Bridge operation completed",
+        amount,
+        targetAddress,
+        targetNetwork,
+        settlementTx: settlement.transactionHash,
+        payer: settlement.payer,
+        status: "success",
+      })
+    },
+  }),
+)
 
 const server = serve({
   fetch: app.fetch,
@@ -127,11 +116,11 @@ server.once("listening", () => {
   console.log("api initialized and running on", env.API_PORT)
 })
 
-// graceful shutdown
 process.on("SIGINT", () => {
   server.close()
   process.exit(0)
 })
+
 process.on("SIGTERM", () => {
   server.close((err) => {
     if (err) {

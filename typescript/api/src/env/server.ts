@@ -9,7 +9,6 @@ export const env = createEnv({
     API_PORT: z.coerce.number().default(4000),
     PRIVY_APP_ID: z.string().min(1),
     PRIVY_APP_SECRET: z.string().min(1),
-    X402_PAY_TO_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
     X402_NETWORK: z.enum(["base", "base-sepolia", "polygon-amoy"]).default("polygon-amoy"),
     X402_FACILITATOR_URL: z.string().url(),
     CDP_API_KEY_ID: z.string().min(1),
