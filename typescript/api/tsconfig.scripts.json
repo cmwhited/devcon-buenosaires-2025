@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.jsonc",
+  "include": ["scripts"],
+  "references": [],
+  "compilerOptions": {
+    "tsBuildInfoFile": ".tsbuildinfo/src.tsbuildinfo",
+    "rootDir": "scripts",
+    "types": ["node"],
+    "emitDeclarationOnly": true
+  }
+}

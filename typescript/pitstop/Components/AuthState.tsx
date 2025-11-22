@@ -6,6 +6,8 @@ import { PowerIcon } from "@phosphor-icons/react"
 import { usePrivy, User } from "@privy-io/react-auth"
 import Image from "next/image"
 
+import { Button } from "./Button"
+
 import { useAuthUserAvatar, useAuthUserENS } from "@/hooks/useEnsName"
 import { createIdenticon } from "@/utils/createIdenticon"
 
@@ -18,27 +20,19 @@ export function AuthStateContainer() {
 
   if (!authenticated || user == null) {
     return (
-      <button
-        type="button"
-        className="cursor-pointer rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50"
-        onClick={() => login()}
-      >
+      <Button type="button" onClick={() => login()}>
         Connect Wallet
-      </button>
+      </Button>
     )
   }
 
   return (
     <div className="flex w-fit items-center gap-x-1.5">
       <AuthUserDisplay user={user} />
-      <button
-        type="button"
-        className="inline-flex cursor-pointer items-center gap-x-0.5 rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50"
-        onClick={() => logout()}
-      >
+      <Button type="button" onClick={() => logout()}>
         Disconnect
         <PowerIcon className="size-5 rounded-full text-inherit" aria-hidden="true" />
-      </button>
+      </Button>
     </div>
   )
 }
@@ -61,13 +55,13 @@ function AuthUserDisplay({ user }: Readonly<{ user: User }>) {
     <Tooltip.Provider>
       <Tooltip.Root>
         <Tooltip.Trigger className="flex w-fit items-center gap-x-0.5">
-          <Avatar.Root className="inline-flex size-6 items-center justify-center overflow-hidden rounded-full bg-gray-100 align-middle text-base font-medium text-black select-none">
-            <Avatar.Image src={avatar || undefined} width="24" height="24" className="size-full object-cover" />
+          <Avatar.Root className="inline-flex size-8 items-center justify-center overflow-hidden rounded-full bg-gray-100 align-middle text-base font-medium text-black select-none">
+            <Avatar.Image src={avatar || undefined} width="32" height="32" className="size-full object-cover" />
             <Avatar.Fallback className="flex size-full items-center justify-center text-base">
               <Image src={createIdenticon(display)} width={24} height={24} alt="" className="size-full object-cover" />
             </Avatar.Fallback>
           </Avatar.Root>
-          <span className="font-mono text-sm">{display}</span>
+          <span className="font-mono text-sm font-semibold text-black">{display}</span>
         </Tooltip.Trigger>
         <Tooltip.Portal>
           <Tooltip.Positioner sideOffset={10}>
