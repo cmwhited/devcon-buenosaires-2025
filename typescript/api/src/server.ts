@@ -1,38 +1,45 @@
-import cors from "@fastify/cors"
-import Fastify from "fastify"
+import { serve } from "@hono/node-server"
+import { Hono } from "hono"
+import { cors } from "hono/cors"
+import { logger } from "hono/logger"
+import { prettyJSON } from "hono/pretty-json"
 
 import { env } from "./env/server.ts"
 
-const app = Fastify({
-  logger: true,
-  ignoreDuplicateSlashes: true,
-  ignoreTrailingSlash: true,
+const app = new Hono()
+
+app.use(logger())
+app.use(prettyJSON())
+app.use(
+  "/api/*",
+  cors({
+    allowHeaders: ["Content-Type", "Accept", "Authorization", "User-Agent"],
+    allowMethods: ["POST", "GET", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    origin: ["http://localhost:3000"],
+  }),
+)
+app.get("/", (c) => c.json({ status: "OK" }))
+
+const server = serve({
+  fetch: app.fetch,
+  port: env.API_PORT,
 })
 
-app
-  .register(cors, {
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Accept", "Authorization"],
-  })
-  .route({
-    method: "GET",
-    url: "/",
-    async handler() {
-      return "OK"
-    },
-  })
+server.once("listening", () => {
+  console.log("api initialized and running on", env.API_PORT)
+})
 
-async function start() {
-  try {
-    await app.listen({ port: env.API_PORT, host: "0.0.0.0" })
-    const address = app.server.address()
-    app.log.info(`api started and running on [${address}]`)
-  } catch (err) {
-    app.log.error("failure initializing api")
-    app.log.error(err)
-    process.exit(1)
-  }
-}
-
-start()
+// graceful shutdown
+process.on("SIGINT", () => {
+  server.close()
+  process.exit(0)
+})
+process.on("SIGTERM", () => {
+  server.close((err) => {
+    if (err) {
+      console.error(err)
+      process.exit(1)
+    }
+    process.exit(0)
+  })
+})
