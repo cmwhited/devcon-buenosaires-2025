@@ -21,10 +21,10 @@ export interface PumpOperationData {
   usdcAmount: string
   ethAmount: number
   transactions: {
-    swap: { network: string, hash: string; status: string }
-    bridge: { network: string, hash: string; status: string }
-    transfer: { network: string, hash: string; status: string }
-    settlement?: { network: string, hash: string; status: string }
+    swap: { network: string; hash: string; status: string }
+    bridge: { network: string; hash: string; status: string }
+    transfer: { network: string; hash: string; status: string }
+    settlement?: { network: string; hash: string; status: string }
   }
 }
 

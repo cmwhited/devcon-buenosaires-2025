@@ -13,7 +13,7 @@ export const env = createEnv({
     X402_FACILITATOR_URL: z.string().url(),
     CDP_API_KEY_ID: z.string().min(1),
     CDP_API_KEY_SECRET: z.string().min(1),
-    CDP_WALLET_SECRET: z.string().min(1)
+    CDP_WALLET_SECRET: z.string().min(1),
   },
   runtimeEnv: process.env,
 })

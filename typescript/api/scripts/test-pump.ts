@@ -50,7 +50,6 @@ async function testPumpEndpoint() {
 
   const body = await response.json()
   logPumpOperation(body)
-
 }
 
 testPumpEndpoint().catch((error) => {
