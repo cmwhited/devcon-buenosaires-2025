@@ -1,6 +1,7 @@
 import { Avatar } from "@base-ui-components/react/avatar"
 
 import { AuthStateContainer } from "./AuthState"
+import { Footer } from "./Footer"
 
 export function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -26,7 +27,9 @@ export function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-2 py-10 md:px-0">{children}</main>
+      <main className="mx-auto grow w-full max-w-7xl flex-1 px-2 py-10 md:px-0">{children}</main>
+
+      <Footer />
     </div>
   )
 }
