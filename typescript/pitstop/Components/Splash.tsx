@@ -15,7 +15,7 @@ export function Splash() {
       <div className="grid w-full grid-cols-3 gap-x-4">
         <div className="col-span-2">
           <div className="flex max-w-xl flex-col gap-y-3">
-            <h3 className="font-sans text-2xl uppercase">Your crosschain filling station</h3>
+            <h3 className="font-sans text-2xl text-(--color-oil-black) uppercase">Your crosschain filling station</h3>
             <p className="whitespace-break-spaces text-black">
               Running on fumes? We&apos;ll get you back on the road. One-click gas delivery to any wallet, any chain.
             </p>
