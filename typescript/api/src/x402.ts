@@ -99,7 +99,9 @@ export interface X402MiddlewareConfig {
 export function x402Middleware(config: X402MiddlewareConfig): MiddlewareHandler {
   return async (c, next) => {
     const paymentRequirements =
-      typeof config.paymentRequirements === "function" ? await config.paymentRequirements(c) : config.paymentRequirements
+      typeof config.paymentRequirements === "function"
+        ? await config.paymentRequirements(c)
+        : config.paymentRequirements
 
     // 1. Check for X-PAYMENT header
     const payment = c.req.header("X-PAYMENT")
