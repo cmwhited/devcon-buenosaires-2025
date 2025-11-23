@@ -40,9 +40,14 @@ export async function createPumpPaymentRequirements(
 
 export function createProcessPumpPayment(x402Network: string, wallets: Wallets) {
   return async (c: Context, _payment: PaymentPayload, _requirement: PaymentRequirements): Promise<void> => {
-    const params = await extractPumpParams(c)
-    const operationData = await executePump(params, wallets, x402Network)
-    c.set("pumpOperation", operationData)
+    try {
+      const params = await extractPumpParams(c)
+      const operationData = await executePump(params, wallets, x402Network)
+      c.set("pumpOperation", operationData)
+    } catch (error) {
+      console.error("Error executing pump", error)
+      throw error
+    }
   }
 }
 
