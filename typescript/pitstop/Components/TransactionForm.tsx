@@ -195,6 +195,21 @@ export function TransactionForm({ user }: Readonly<{ user: User }>) {
               </SecondaryButton>
             </div>
           ) : null}
+          {status === "error" ? (
+            <div className="flex w-full flex-col items-center justify-center gap-y-6">
+              <h3 className="font-sans text-3xl font-semibold tracking-wide text-(--color-oil-black)">Fuel Spill!</h3>
+              <Image src="/images/error.png" width={290} height={290} className="size-[238px] object-cover" alt="" />
+              <SecondaryButton
+                type="button"
+                onClick={() => {
+                  txForm.reset()
+                  reset()
+                }}
+              >
+                Retry fill up
+              </SecondaryButton>
+            </div>
+          ) : null}
           {status === "idle" ? (
             <div className="flex w-full flex-col gap-y-6">
               <h3 className="font-sans text-3xl font-semibold tracking-wide text-(--color-oil-black)">
