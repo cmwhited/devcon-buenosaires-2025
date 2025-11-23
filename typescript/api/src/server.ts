@@ -60,10 +60,18 @@ app.post(
   }),
 )
 
+app.get(
+  "/api/pump",
+  x402Middleware({
+    paymentRequirements: (c) => createPumpPaymentRequirements(c, x402PayToAddress, sharedEnv.X402_NETWORK),
+    onVerified: createProcessPumpPayment(sharedEnv.X402_NETWORK, wallets),
+    onSettle: createPumpResponse,
+  }),
+)
+
 app.post("/api/quote", async (c) => {
   try {
     const body = await c.req.json<SwapQuoteRequest>()
-    console.log(body)
     const quote = await getSwapQuote(body)
     return c.json(quote)
   } catch (error) {

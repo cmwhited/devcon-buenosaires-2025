@@ -7,7 +7,7 @@ config()
 export const sharedEnv = createEnv({
   server: {
     X402_NETWORK: z.enum(["base", "base-sepolia", "polygon-amoy"]).default("polygon-amoy"),
-    X402_FACILITATOR_URL: z.string().url(),
+    X402_FACILITATOR_URL: z.url(),
     CDP_API_KEY_ID: z.string().min(1),
     CDP_API_KEY_SECRET: z.string().min(1),
     CDP_WALLET_SECRET: z.string().min(1),
