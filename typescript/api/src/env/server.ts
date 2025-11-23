@@ -11,6 +11,9 @@ export const env = createEnv({
     PRIVY_APP_ID: z.string().min(1),
     PRIVY_APP_SECRET: z.string().min(1),
     X402_FACILITATOR_URL: z.string().url(),
+    POLYGON_AMOY_RPC: z.string().url(),
+    BASE_SEPOLIA_RPC: z.string().url(),
+    ETHEREUM_SEPOLIA_RPC: z.string().url(),
   },
   runtimeEnv: process.env,
 })

@@ -6,7 +6,8 @@ import { baseSepolia, polygonAmoy, sepolia } from "viem/chains"
 import { toAccount } from "viem/accounts"
 
 import { env } from "./env/server.ts"
-import { executeUsdcToEthSwap } from "./swap.ts"
+import { sharedEnv } from "./shared/env.ts"
+import { executeUsdcToEthSwap } from "./shared/swap.ts"
 
 // ============================================================================
 // CONFIGURATION - Adjust these values as needed
@@ -14,13 +15,13 @@ import { executeUsdcToEthSwap } from "./swap.ts"
 
 const CONFIG = {
   // ETH balance threshold - bridge USDC if ETH balance falls below this
-  ETH_BALANCE_THRESHOLD: parseUnits("2.001", 18), // 0.001 ETH
+  ETH_BALANCE_THRESHOLD: parseUnits("0.001", 18),
 
   // Amount of USDC to bridge when refilling
-  USDC_BRIDGE_AMOUNT: "1", // 5 USDC
+  USDC_BRIDGE_AMOUNT: "5",
 
   // Minimum USDC balance on Polygon Amoy before we stop bridging
-  MIN_POLYGON_USDC_BALANCE: parseUnits("10", 6), // 10 USDC
+  MIN_POLYGON_USDC_BALANCE: parseUnits("10", 6),
 
   // USDC contract addresses
   USDC_ADDRESSES: {
@@ -38,9 +39,9 @@ const CONFIG = {
 
   // RPC endpoints
   RPC_URLS: {
-    "polygon-amoy": process.env.POLYGON_AMOY_RPC || "https://rpc-amoy.polygon.technology",
-    sepolia: process.env.ETHEREUM_SEPOLIA_RPC || "https://rpc.ankr.com/eth_sepolia",
-    "base-sepolia": process.env.BASE_SEPOLIA_RPC || "https://sepolia.base.org",
+    "polygon-amoy": env.POLYGON_AMOY_RPC,
+    sepolia: env.ETHEREUM_SEPOLIA_RPC,
+    "base-sepolia": env.BASE_SEPOLIA_RPC,
   },
 } as const
 
@@ -80,9 +81,9 @@ async function getCdpAccount() {
   if (cachedCdpAccount) return cachedCdpAccount
 
   const cdp = new CdpClient({
-    apiKeyId: env.CDP_API_KEY_ID,
-    apiKeySecret: env.CDP_API_KEY_SECRET,
-    walletSecret: env.CDP_WALLET_SECRET,
+    apiKeyId: sharedEnv.CDP_API_KEY_ID,
+    apiKeySecret: sharedEnv.CDP_API_KEY_SECRET,
+    walletSecret: sharedEnv.CDP_WALLET_SECRET,
   })
 
   cachedCdpAccount = await cdp.evm.createAccount({
@@ -210,7 +211,7 @@ async function executeBridge(toChain: DestinationChain, amount: string): Promise
         }
 
         if (method === "eth_sendRawTransaction") {
-          return walletClient.request({ method: method as any, params })
+          return walletClient.request({ method: method as any, params: params as any })
         }
 
         const signingMethods = new Set([
@@ -221,10 +222,10 @@ async function executeBridge(toChain: DestinationChain, amount: string): Promise
           "eth_signTransaction",
         ])
         if (signingMethods.has(method)) {
-          return walletClient.request({ method: method as any, params })
+          return walletClient.request({ method: method as any, params: params as any })
         }
 
-        return publicClient.request({ method: method as any, params })
+        return publicClient.request({ method: method as any, params: params as any })
       },
     }
   }
