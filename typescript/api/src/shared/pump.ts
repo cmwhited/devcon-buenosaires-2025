@@ -39,6 +39,7 @@ export async function executePump(
     tokenOut: "ETH",
   })
 
+  console.log("quote", quote)
   // check quote and amount eth are within an accepted slippage
   if (amountEth !== undefined) {
     const slippage = 0.01
@@ -47,9 +48,10 @@ export async function executePump(
       throw new Error("Amount eth is less than the minimum amount out")
     }
   }
+  console.log("amountEth", amountEth)
 
   const ethAmount = amountEth ? parseFloat(amountEth) : parseFloat(quote.amountOut)
-
+  console.log("ethAmount", ethAmount)
   // 3. Transfer ETH to target address (REAL)
   const targetNetwork = network as SupportedNetwork
   const wallet = wallets[targetNetwork]
@@ -58,7 +60,7 @@ export async function executePump(
     throw new Error(`Wallet not found for network: ${targetNetwork}`)
   }
 
-  const ethAmountWei = parseEther(ethAmount.toString())
+  const ethAmountWei = parseEther(ethAmount.toFixed(18))
   console.log(`Transferring ${ethAmount} ETH to ${targetAddress} on ${targetNetwork}...`)
   const txTransferReceipt = await sendEth(wallet.account, targetNetwork, targetAddress as `0x${string}`, ethAmountWei)
   console.log(`Transfer complete! Transaction hash: ${txTransferReceipt.transactionHash}`)
