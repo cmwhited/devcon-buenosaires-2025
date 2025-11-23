@@ -1,34 +1,16 @@
 import { Context } from "hono"
-import { parseEther } from "viem"
-import type { Network, PaymentPayload, PaymentRequirements, Resource } from "x402/types"
+import type { PaymentPayload, PaymentRequirements } from "x402/types"
 
-import { SupportedNetwork } from "./networks.ts"
-import { sendEth, Wallets } from "./wallet.ts"
-import { createExactPaymentRequirements } from "./x402.ts"
+import {
+  calculatePumpPaymentRequirements,
+  executePump,
+  type PumpOperationData,
+  type PumpParams,
+  Wallets,
+} from "./shared/index.ts"
 
-interface PumpRequest {
-  amount: string
-  network: string
-  targetAddress: string
-}
-
-export interface PumpOperationData {
-  sourceAddress?: string
-  sourceNetwork: string
-  targetAddress: string
-  targetNetwork: string
-  usdcAmount: string
-  ethAmount: number
-  transactions: {
-    swap: { network: string; hash: string; status: string }
-    bridge: { network: string; hash: string; status: string }
-    transfer: { network: string; hash: string; status: string }
-    settlement?: { network: string; hash: string; status: string }
-  }
-}
-
-async function extractPumpParams(c: Context): Promise<PumpRequest> {
-  const body = await c.req.json<Partial<PumpRequest>>()
+async function extractPumpParams(c: Context): Promise<PumpParams> {
+  const body = await c.req.json<Partial<PumpParams>>()
 
   const { amount, network, targetAddress } = body
 
@@ -43,81 +25,23 @@ async function extractPumpParams(c: Context): Promise<PumpRequest> {
   }
 }
 
+export { type PumpOperationData }
+
 export async function createPumpPaymentRequirements(
   c: Context,
   payToAddress: string,
   x402Network: string,
 ): Promise<PaymentRequirements[]> {
-  const { amount, network, targetAddress } = await extractPumpParams(c)
-
-  const resource = c.req.url as Resource
-  return [
-    createExactPaymentRequirements(
-      `$${amount}`,
-      x402Network as Network,
-      resource,
-      payToAddress,
-      `Pump ${amount} USDC to ${targetAddress} on ${network}`,
-    ),
-  ]
+  const params = await extractPumpParams(c)
+  const resource = c.req.url
+  return [calculatePumpPaymentRequirements(params, x402Network, payToAddress, resource)]
 }
 
 export function createProcessPumpPayment(x402Network: string, wallets: Wallets) {
   return async (c: Context, _payment: PaymentPayload, _requirement: PaymentRequirements): Promise<void> => {
-    const { amount, network, targetAddress } = await extractPumpParams(c)
-
-    try {
-      const ethAmount = parseFloat(amount) * 0.0003 // Mock conversion rate
-
-      // 4.d. Transfer ETH to target address (REAL)
-      const targetNetwork = network as SupportedNetwork
-      const wallet = wallets[targetNetwork]
-
-      if (!wallet) {
-        throw new Error(`Wallet not found for network: ${targetNetwork}`)
-      }
-
-      const ethAmountWei = parseEther(ethAmount.toString())
-      console.log(`Transferring ${ethAmount} ETH to ${targetAddress} on ${targetNetwork}...`)
-      const txTransferReceipt = await sendEth(
-        wallet.account,
-        targetNetwork,
-        targetAddress as `0x${string}`,
-        ethAmountWei,
-      )
-      console.log(`Transfer complete! Transaction hash: ${txTransferReceipt.transactionHash}`)
-
-      // Store operation data in context for later retrieval
-      const operationData: PumpOperationData = {
-        sourceNetwork: x402Network,
-        usdcAmount: amount,
-        ethAmount,
-        targetAddress,
-        targetNetwork,
-        transactions: {
-          swap: {
-            network: x402Network,
-            hash: "0xMOCKED_SWAP_TX",
-            status: "mocked",
-          },
-          bridge: {
-            network: x402Network,
-            hash: "0xMOCKED_BRIDGE_TX",
-            status: "mocked",
-          },
-          transfer: {
-            network: targetNetwork,
-            hash: txTransferReceipt.transactionHash,
-            status: txTransferReceipt.status,
-          },
-        },
-      }
-
-      c.set("pumpOperation", operationData)
-    } catch (error) {
-      console.error("Error processing pump payment:", error)
-      throw error
-    }
+    const params = await extractPumpParams(c)
+    const operationData = await executePump(params, wallets, x402Network)
+    c.set("pumpOperation", operationData)
   }
 }
 

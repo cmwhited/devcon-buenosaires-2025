@@ -1,5 +1,6 @@
 packages:
   - typescript/*
+  - external/ampersend-sdk/typescript/packages/*
 
 onlyBuiltDependencies:
   - '@reown/appkit'
