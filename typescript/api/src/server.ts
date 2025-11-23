@@ -9,16 +9,15 @@ import { secureHeaders } from "hono/secure-headers"
 import { formatEther } from "viem"
 
 import { env } from "./env/server.ts"
+import { x402Middleware } from "./middleware.ts"
 import {
   createProcessPumpPayment,
   createPumpPaymentRequirements,
   createPumpResponse,
   PumpOperationData,
 } from "./pump.ts"
-import { getSwapQuote, SwapQuoteRequest } from "./swap.ts"
+import { getSwapQuote, getWallets, sharedEnv, type SwapQuoteRequest } from "./shared/index.ts"
 import { logServerBoot } from "./utils.ts"
-import { getWallets } from "./wallet.ts"
-import { x402Middleware } from "./x402.ts"
 
 interface ApiContext extends Env {
   Variables: {
@@ -57,8 +56,8 @@ app.get("/", (c) => c.json({ status: "OK" }))
 app.post(
   "/api/pump",
   x402Middleware({
-    paymentRequirements: (c) => createPumpPaymentRequirements(c, x402PayToAddress, env.X402_NETWORK),
-    onVerified: createProcessPumpPayment(env.X402_NETWORK, wallets),
+    paymentRequirements: (c) => createPumpPaymentRequirements(c, x402PayToAddress, sharedEnv.X402_NETWORK),
+    onVerified: createProcessPumpPayment(sharedEnv.X402_NETWORK, wallets),
     onSettle: createPumpResponse,
   }),
 )

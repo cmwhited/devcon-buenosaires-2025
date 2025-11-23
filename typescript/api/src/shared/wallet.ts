@@ -1,7 +1,7 @@
 import { CdpClient, EvmServerAccount } from "@coinbase/cdp-sdk"
 import { TransactionReceipt } from "viem"
 
-import { env } from "./env/server.ts"
+import { sharedEnv } from "./env.ts"
 import { SUPPORTED_NETWORKS, SupportedNetwork } from "./networks.ts"
 import { getRpcClient } from "./rpc.ts"
 
@@ -9,9 +9,9 @@ const CDP_ACCOUNT_NAME = "gas-station"
 const CDP_ACCOUNT_IDEMPOTENCY_KEY = "a104a221-36a7-4e10-95fb-05580a24cb76"
 
 const cdp = new CdpClient({
-  apiKeyId: env.CDP_API_KEY_ID,
-  apiKeySecret: env.CDP_API_KEY_SECRET,
-  walletSecret: env.CDP_WALLET_SECRET,
+  apiKeyId: sharedEnv.CDP_API_KEY_ID,
+  apiKeySecret: sharedEnv.CDP_API_KEY_SECRET,
+  walletSecret: sharedEnv.CDP_WALLET_SECRET,
 })
 
 export type WalletInfo = { account: EvmServerAccount; balance: bigint }
