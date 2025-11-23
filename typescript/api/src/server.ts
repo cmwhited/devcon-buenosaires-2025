@@ -41,7 +41,7 @@ const app = new Hono<ApiContext>()
 app.use(
   "*",
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:3001",
     exposeHeaders: ["X-PAYMENT-RESPONSE"],
   }),
 )
@@ -61,10 +61,18 @@ app.post(
   }),
 )
 
+app.get(
+  "/api/pump",
+  x402Middleware({
+    paymentRequirements: (c) => createPumpPaymentRequirements(c, x402PayToAddress, env.X402_NETWORK),
+    onVerified: createProcessPumpPayment(env.X402_NETWORK, wallets),
+    onSettle: createPumpResponse,
+  }),
+)
+
 app.post("/api/quote", async (c) => {
   try {
     const body = await c.req.json<SwapQuoteRequest>()
-    console.log(body)
     const quote = await getSwapQuote(body)
     return c.json(quote)
   } catch (error) {

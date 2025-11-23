@@ -3,6 +3,7 @@ import { parseEther } from "viem"
 import type { Network, PaymentPayload, PaymentRequirements, Resource } from "x402/types"
 
 import { SupportedNetwork } from "./networks.ts"
+import { getSwapQuote } from "./swap.ts"
 import { sendEth, Wallets } from "./wallet.ts"
 import { createExactPaymentRequirements } from "./x402.ts"
 
@@ -10,6 +11,7 @@ interface PumpRequest {
   amount: string
   network: string
   targetAddress: string
+  amountEth: string
 }
 
 export interface PumpOperationData {
@@ -30,16 +32,17 @@ export interface PumpOperationData {
 async function extractPumpParams(c: Context): Promise<PumpRequest> {
   const body = await c.req.json<Partial<PumpRequest>>()
 
-  const { amount, network, targetAddress } = body
+  const { amount, network, targetAddress, amountEth } = body
 
-  if (!amount || !network || !targetAddress) {
-    throw new Error("Missing required parameters: amount, network, targetAddress")
+  if (!amount || !network || !targetAddress || !amountEth) {
+    throw new Error("Missing required parameters: amount, network, targetAddress, amountEth")
   }
 
   return {
     amount,
     network,
     targetAddress,
+    amountEth,
   }
 }
 
@@ -64,10 +67,24 @@ export async function createPumpPaymentRequirements(
 
 export function createProcessPumpPayment(x402Network: string, wallets: Wallets) {
   return async (c: Context, _payment: PaymentPayload, _requirement: PaymentRequirements): Promise<void> => {
-    const { amount, network, targetAddress } = await extractPumpParams(c)
+    const { amount, network, targetAddress, amountEth } = await extractPumpParams(c)
 
     try {
-      const ethAmount = parseFloat(amount) * 0.0003 // Mock conversion rate
+      const quote = await getSwapQuote({
+        network: network as SupportedNetwork,
+        amountIn: amount,
+        tokenIn: "USDC",
+        tokenOut: "ETH",
+      })
+
+      // check quote and amount eth are within an accepted slippage
+      const slippage = 0.01
+      const minAmountOut = parseFloat(quote.amountOut) * (1 - slippage)
+      if (parseFloat(amountEth) < minAmountOut) {
+        throw new Error("Amount eth is less than the minimum amount out")
+      }
+
+      const ethAmount = parseFloat(amountEth)
 
       // 4.d. Transfer ETH to target address (REAL)
       const targetNetwork = network as SupportedNetwork
