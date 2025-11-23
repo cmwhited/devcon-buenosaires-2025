@@ -14,8 +14,8 @@ async function extractPumpParams(c: Context): Promise<PumpParams> {
 
   const { amount, network, targetAddress, amountEth } = body
 
-  if (!amount || !network || !targetAddress || !amountEth) {
-    throw new Error("Missing required parameters: amount, network, targetAddress, amountEth")
+  if (!amount || !network || !targetAddress) {
+    throw new Error("Missing required parameters: amount, network, targetAddress")
   }
 
   return {

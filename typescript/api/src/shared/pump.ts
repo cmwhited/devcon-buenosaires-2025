@@ -40,13 +40,15 @@ export async function executePump(
   })
 
   // check quote and amount eth are within an accepted slippage
-  const slippage = 0.01
-  const minAmountOut = parseFloat(quote.amountOut) * (1 - slippage)
-  if (parseFloat(amountEth) < minAmountOut) {
-    throw new Error("Amount eth is less than the minimum amount out")
+  if (amountEth !== undefined) {
+    const slippage = 0.01
+    const minAmountOut = parseFloat(quote.amountOut) * (1 - slippage)
+    if (parseFloat(amountEth) < minAmountOut) {
+      throw new Error("Amount eth is less than the minimum amount out")
+    }
   }
 
-  const ethAmount = parseFloat(amountEth)
+  const ethAmount = amountEth ? parseFloat(amountEth) : parseFloat(quote.amountOut)
 
   // 3. Transfer ETH to target address (REAL)
   const targetNetwork = network as SupportedNetwork

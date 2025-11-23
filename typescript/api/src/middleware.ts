@@ -4,11 +4,11 @@ import { findMatchingPaymentRequirements } from "x402/shared"
 import { type PaymentPayload, type PaymentRequirements, settleResponseHeader } from "x402/types"
 import { useFacilitator } from "x402/verify"
 
-import { env } from "./env/server.ts"
+import { sharedEnv } from "./shared/env.ts"
 
 const x402Version = 1
 const { verify, settle } = useFacilitator({
-  url: env.X402_FACILITATOR_URL as `${string}://${string}`,
+  url: sharedEnv.X402_FACILITATOR_URL as `${string}://${string}`,
 })
 
 export function decodePayment(paymentHeader: string): PaymentPayload {

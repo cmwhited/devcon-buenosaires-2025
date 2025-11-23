@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { User, useX402Fetch } from "@privy-io/react-auth"
+import { User, useWallets, useX402Fetch } from "@privy-io/react-auth"
 import { createFormHook, useStore } from "@tanstack/react-form"
 import { useMutation } from "@tanstack/react-query"
 import Image from "next/image"
@@ -72,6 +72,7 @@ const defaultValues: TransactionFormSchema = {
 
 export function TransactionForm({ user }: Readonly<{ user: User }>) {
   const { wrapFetchWithPayment } = useX402Fetch()
+  const { wallets } = useWallets()
 
   const { mutateAsync, data, status, reset } = useMutation<
     PumpOperationData | { status: "success"; ethAmount: number },
@@ -81,8 +82,10 @@ export function TransactionForm({ user }: Readonly<{ user: User }>) {
     mutationKey: ["tx", "send", { user: user.id }] as const,
     async mutationFn(vars) {
       try {
+        const embeddedWallets = wallets.filter((wallet) => wallet.connectorType === "embedded")
         const fetchWithPayment = wrapFetchWithPayment({
           fetch,
+          walletAddress: embeddedWallets[0].address,
         })
         const response = await fetchWithPayment("http://localhost:4000/api/pump", {
           method: "POST",
