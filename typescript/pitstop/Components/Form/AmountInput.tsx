@@ -57,7 +57,7 @@ export function AmounInput({ id, name, label, hint, ...rest }: Readonly<AmountIn
           />
         </div>
         {hint != null && !hasErrors ? (
-          <p id={`${id}-hint`} className="mt-1.5 text-sm/6 text-gray-400">
+          <p id={`${id}-hint`} className="mt-1.5 text-sm text-[#1a1a1a]">
             {hint}
           </p>
         ) : null}
