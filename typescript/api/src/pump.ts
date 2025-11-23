@@ -1,12 +1,18 @@
 import { Context } from "hono"
 import type { PaymentPayload, PaymentRequirements } from "x402/types"
 
-import { calculatePumpPaymentRequirements, executePump, type PumpOperationData, type PumpParams, Wallets } from "./shared/index.ts"
+import {
+  calculatePumpPaymentRequirements,
+  executePump,
+  type PumpOperationData,
+  type PumpParams,
+  Wallets,
+} from "./shared/index.ts"
 
 async function extractPumpParams(c: Context): Promise<PumpParams> {
   const body = await c.req.json<Partial<PumpParams>>()
 
-  const { amount, network, targetAddress } = body
+  const { amount, network, targetAddress, amountEth } = body
 
   if (!amount || !network || !targetAddress) {
     throw new Error("Missing required parameters: amount, network, targetAddress")
@@ -16,6 +22,7 @@ async function extractPumpParams(c: Context): Promise<PumpParams> {
     amount,
     network,
     targetAddress,
+    amountEth,
   }
 }
 

@@ -1,10 +1,10 @@
 import { ChainId, Token } from "@uniswap/sdk-core"
+import { CommandType, RoutePlanner } from "@uniswap/universal-router-sdk"
 import { Actions, V4Planner } from "@uniswap/v4-sdk"
-import { RoutePlanner, CommandType } from "@uniswap/universal-router-sdk"
 import { Contract, formatUnits, JsonRpcProvider, parseUnits } from "ethers"
-import { parseUnits as viemParseUnits, createWalletClient, http } from "viem"
-import { sepolia, baseSepolia } from "viem/chains"
+import { createWalletClient, http, parseUnits as viemParseUnits } from "viem"
 import { toAccount } from "viem/accounts"
+import { baseSepolia, sepolia } from "viem/chains"
 
 import { SupportedNetwork } from "./networks.ts"
 import { getRpcClient } from "./rpc.ts"
@@ -84,7 +84,11 @@ export async function getSwapQuote(request: SwapQuoteRequest): Promise<SwapQuote
   const { quoter: QUOTER_ADDRESS, usdc: USDC_TOKEN, eth: ETH_TOKEN } = getUniswapContext(request.network)
 
   const publicClient = getRpcClient(request.network)
-  const quoterContract = new Contract(QUOTER_ADDRESS, QUOTER_ABI, new JsonRpcProvider(publicClient.chain?.rpcUrls.default.http[0]))
+  const quoterContract = new Contract(
+    QUOTER_ADDRESS,
+    QUOTER_ABI,
+    new JsonRpcProvider(publicClient.chain?.rpcUrls.default.http[0]),
+  )
 
   const { amountIn, tokenIn, tokenOut } = request
 
@@ -165,7 +169,7 @@ async function tryGetQuote(
       amountOut: quotedAmountOut.amountOut,
       config: poolConfig,
     }
-  } catch (error) {
+  } catch {
     // Pool doesn't exist or has no liquidity, go to next pool config
     return null
   }
@@ -309,11 +313,7 @@ export interface SwapResult {
   error?: string
 }
 
-async function ensureUsdcApprovalForPermit2(
-  network: SwapNetwork,
-  cdpAccount: any,
-  amount: bigint,
-): Promise<void> {
+async function ensureUsdcApprovalForPermit2(network: SwapNetwork, cdpAccount: any, amount: bigint): Promise<void> {
   const config = UNISWAP_V4_CONFIG[network]
   const account = toAccount(cdpAccount)
   const publicClient = getRpcClient(network)

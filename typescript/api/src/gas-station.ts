@@ -1,9 +1,9 @@
-import { BridgeKit } from "@circle-fin/bridge-kit"
 import { createAdapterFromProvider } from "@circle-fin/adapter-viem-v2"
+import { BridgeKit } from "@circle-fin/bridge-kit"
 import { CdpClient } from "@coinbase/cdp-sdk"
 import { createPublicClient, createWalletClient, http, parseUnits } from "viem"
-import { baseSepolia, polygonAmoy, sepolia } from "viem/chains"
 import { toAccount } from "viem/accounts"
+import { baseSepolia, polygonAmoy, sepolia } from "viem/chains"
 
 import { env } from "./env/server.ts"
 import { sharedEnv } from "./shared/env.ts"
@@ -98,10 +98,7 @@ async function getCdpAccount() {
 // BALANCE CHECKING
 // ============================================================================
 
-async function checkEthBalance(
-  chain: DestinationChain,
-  address: `0x${string}`,
-): Promise<BalanceCheckResult> {
+async function checkEthBalance(chain: DestinationChain, address: `0x${string}`): Promise<BalanceCheckResult> {
   const chainConfig = chain === "sepolia" ? sepolia : baseSepolia
   const rpcUrl = CONFIG.RPC_URLS[chain]
 
@@ -184,7 +181,7 @@ async function executeBridge(toChain: DestinationChain, amount: string): Promise
     })
 
     return {
-      request: async ({ method, params }: { method: string; params?: any[] }) => {
+      request: async ({ method, params }: { method: string; params?: Array<any> }) => {
         if (method === "eth_accounts" || method === "eth_requestAccounts") {
           return [account.address]
         }

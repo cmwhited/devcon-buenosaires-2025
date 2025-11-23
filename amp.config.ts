@@ -2,8 +2,10 @@ import { defineDataset } from "@edgeandnode/amp"
 
 const network = "base-sepolia" as const
 const PitstopServerWalletAddressMap = {
-  [network]: "87f78a9c6A46f07d60F7101A270b34F5dDf4DAa3",
-} as const satisfies Record<"base-sepolia", string>
+  [network]: { address: "87f78a9c6A46f07d60F7101A270b34F5dDf4DAa3", block: 34009800 },
+} as const satisfies Record<"base-sepolia", { address: string; block: number }>
+
+const where = PitstopServerWalletAddressMap[network]
 
 export default defineDataset(() => ({
   namespace: "pitstop",
@@ -29,7 +31,7 @@ Currently servicing: base, polygon, ETH mainnet.
   },
   tables: {
     pitstop_transactions: {
-      sql: `SELECT * FROM transactions.transactions WHERE "from" = x'${PitstopServerWalletAddressMap[network]}'`,
+      sql: `SELECT * FROM transactions.transactions WHERE _block_num >= ${where.block} AND "from" = x'${where.address}'`,
     },
   },
 }))

@@ -2,9 +2,11 @@ import { parseEther } from "viem"
 import type { Network, PaymentRequirements, Resource } from "x402/types"
 
 import { SupportedNetwork } from "./networks.ts"
+import { getSwapQuote } from "./swap.ts"
+import type { PumpOperationData, PumpParams } from "./types.ts"
 import { sendEth, Wallets } from "./wallet.ts"
 import { createExactPaymentRequirements } from "./x402.ts"
-import type { PumpOperationData, PumpParams } from "./types.ts"
+
 
 export function calculatePumpPaymentRequirements(
   params: PumpParams,
@@ -28,20 +30,25 @@ export async function executePump(
   wallets: Wallets,
   x402Network: string,
 ): Promise<PumpOperationData> {
-  const { amount, network, targetAddress } = params
+  const { amount, network, targetAddress, amountEth } = params
 
-  // 1. Swap USDC to ETH (mocked)
-  console.log(`[MOCK] Swapping ${amount} USDC to ETH...`)
-  await new Promise((resolve) => setTimeout(resolve, 100))
-  const ethAmount = parseFloat(amount) * 0.0003 // Mock conversion rate
-  console.log(`[MOCK] Swapped to ${ethAmount} ETH`)
+  const quote = await getSwapQuote({
+    network: network as SupportedNetwork,
+    amountIn: amount,
+    tokenIn: "USDC",
+    tokenOut: "ETH",
+  })
 
-  // 2. Bridge ETH to target chain (mocked)
-  if (network !== x402Network) {
-    console.log(`[MOCK] Bridging ${ethAmount} ETH to ${network}...`)
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    console.log(`[MOCK] Bridge initiated`)
+  // check quote and amount eth are within an accepted slippage
+  if (amountEth !== undefined) {
+    const slippage = 0.01
+    const minAmountOut = parseFloat(quote.amountOut) * (1 - slippage)
+    if (parseFloat(amountEth) < minAmountOut) {
+      throw new Error("Amount eth is less than the minimum amount out")
+    }
   }
+
+  const ethAmount = amountEth ? parseFloat(amountEth) : parseFloat(quote.amountOut)
 
   // 3. Transfer ETH to target address (REAL)
   const targetNetwork = network as SupportedNetwork

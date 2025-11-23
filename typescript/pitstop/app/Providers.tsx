@@ -4,7 +4,7 @@ import { Toast } from "@base-ui-components/react/toast"
 import { PrivyProvider } from "@privy-io/react-auth"
 import { WagmiProvider } from "@privy-io/wagmi"
 import { QueryClientProvider } from "@tanstack/react-query"
-import { polygon } from "viem/chains"
+import { polygonAmoy } from "viem/chains"
 import type { State } from "wagmi"
 
 import { getQueryClient } from "@/clients/query"
@@ -23,13 +23,13 @@ export function Providers({
       appId={env.NEXT_PUBLIC_APP_ID}
       clientId={env.NEXT_PUBLIC_CLIENT_ID}
       config={{
-        defaultChain: { ...polygon, testnet: false },
-        supportedChains: [{ ...polygon, testnet: false }],
+        defaultChain: { ...polygonAmoy, testnet: true },
+        supportedChains: [{ ...polygonAmoy, testnet: true }],
         captchaEnabled: true,
         loginMethods: ["wallet"],
         embeddedWallets: {
           ethereum: {
-            createOnLogin: "users-without-wallets",
+            createOnLogin: "all-users",
           },
         },
         appearance: {

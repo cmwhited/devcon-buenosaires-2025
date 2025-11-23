@@ -2,6 +2,7 @@ export interface PumpParams {
   amount: string
   network: string
   targetAddress: string
+  amountEth: string | undefined
 }
 
 export interface PumpOperationData {

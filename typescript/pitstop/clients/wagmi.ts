@@ -1,6 +1,6 @@
 import { createConfig } from "@privy-io/wagmi"
 import { createClient, http } from "viem"
-import { polygon } from "viem/chains"
+import { polygonAmoy } from "viem/chains"
 import { cookieStorage, createStorage } from "wagmi"
 import { coinbaseWallet, injected, walletConnect } from "wagmi/connectors"
 
@@ -8,7 +8,7 @@ import { env } from "@/env/client"
 import { getAppUrl } from "@/utils/url"
 
 export const wagmiConfig = createConfig({
-  chains: [polygon] as const,
+  chains: [polygonAmoy] as const,
   ssr: true,
   client(params) {
     const transport = http(`https://polygon-rpc.com`)

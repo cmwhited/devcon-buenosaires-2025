@@ -3,7 +3,8 @@
     "allow": [
       "Bash(pnpm lint:*)",
       "Bash(pnpm typecheck:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

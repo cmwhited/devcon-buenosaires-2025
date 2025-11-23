@@ -3,16 +3,17 @@
 import { usePrivy } from "@privy-io/react-auth"
 
 import { Splash } from "./Splash"
+import { TransactionForm } from "./TransactionForm"
 
 export function AppContent() {
-  const { authenticated, ready } = usePrivy()
+  const { authenticated, ready, user } = usePrivy()
 
   if (!ready) {
     return null
   }
-  if (!authenticated) {
+  if (!authenticated || user == null) {
     return <Splash />
   }
 
-  return <div>App form goes here</div>
+  return <TransactionForm user={user} />
 }

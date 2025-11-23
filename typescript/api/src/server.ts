@@ -9,8 +9,8 @@ import { secureHeaders } from "hono/secure-headers"
 import { formatEther } from "viem"
 
 import { env } from "./env/server.ts"
-import { x402Middleware } from "./middleware.ts"
 import { runGasStationCheck } from "./gas-station.ts"
+import { x402Middleware } from "./middleware.ts"
 import {
   createProcessPumpPayment,
   createPumpPaymentRequirements,
@@ -38,20 +38,18 @@ console.log("\n")
 const x402PayToAddress = wallets["base-sepolia"].account.address
 
 const app = new Hono<ApiContext>()
+app.use(
+  "*",
+  cors({
+    origin: "http://localhost:3001",
+    exposeHeaders: ["X-PAYMENT-RESPONSE"],
+  }),
+)
 app.use(logger())
 app.use(prettyJSON())
 app.use("*", requestId())
 app.use(secureHeaders())
 app.use(contextStorage())
-app.use(
-  "/api/*",
-  cors({
-    allowHeaders: ["Content-Type", "Accept", "Authorization", "User-Agent", "X-PAYMENT", "X-PAYMENT-RESPONSE"],
-    allowMethods: ["POST", "GET", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    exposeHeaders: ["X-PAYMENT-RESPONSE"],
-    origin: ["http://localhost:3000"],
-  }),
-)
 app.get("/", (c) => c.json({ status: "OK" }))
 
 app.post(
@@ -63,10 +61,18 @@ app.post(
   }),
 )
 
+app.get(
+  "/api/pump",
+  x402Middleware({
+    paymentRequirements: (c) => createPumpPaymentRequirements(c, x402PayToAddress, sharedEnv.X402_NETWORK),
+    onVerified: createProcessPumpPayment(sharedEnv.X402_NETWORK, wallets),
+    onSettle: createPumpResponse,
+  }),
+)
+
 app.post("/api/quote", async (c) => {
   try {
     const body = await c.req.json<SwapQuoteRequest>()
-    console.log(body)
     const quote = await getSwapQuote(body)
     return c.json(quote)
   } catch (error) {
