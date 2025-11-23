@@ -1,6 +1,6 @@
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 import { Client } from "@edgeandnode/ampersend-sdk/mcp/client"
 import { AccountWallet, NaiveTreasurer } from "@edgeandnode/ampersend-sdk/x402"
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 
 export async function createMcpClient() {
   const serverUrl = process.env.MCP_SERVER_URL || "http://localhost:8080/mcp"

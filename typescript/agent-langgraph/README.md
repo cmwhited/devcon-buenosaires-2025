@@ -15,6 +15,7 @@ MCP Server (typescript/api)
 ```
 
 **Key Features:**
+
 - 🤖 LangGraph.js ReAct agent with OpenAI
 - 💰 Automatic x402 micropayments via ampersend-sdk
 - 🔧 Two MCP tools: `pump` (paid) and `quote` (free)
@@ -70,6 +71,7 @@ pnpm dev:mcp
 ```
 
 The server will start on `http://localhost:8080/mcp` with two tools:
+
 - **pump** - Cross-chain gas refill (requires x402 payment)
 - **quote** - Get swap quote for ETH/USDC (free)
 
@@ -111,6 +113,7 @@ npx @langchain/langgraph-cli dev
 ```
 
 This will start the local dev server and automatically open the Studio Web UI in your browser at:
+
 ```
 https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
 ```
@@ -118,6 +121,7 @@ https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
 **Note:** You'll need to log in with your LangSmith account (free accounts work).
 
 **Safari Users:** Safari blocks localhost connections. Use the `--tunnel` flag instead:
+
 ```bash
 npx @langchain/langgraph-cli dev --tunnel
 ```
@@ -158,18 +162,21 @@ The **Web UI method is recommended** as it works on all platforms and doesn't re
 ### Architecture
 
 **src/mcp-client.ts**
+
 - Creates X402-aware MCP client
 - Configures AccountWallet from private key
 - Sets up NaiveTreasurer for auto-approval
 - Connects to MCP server via HTTP Stream transport
 
 **src/agent.ts**
+
 - Main CLI entry point
 - Loads MCP tools via @langchain/mcp-adapters
 - Creates LangGraph ReAct agent with OpenAI
 - Handles command-line queries
 
 **src/graph.ts**
+
 - Exports graph for LangGraph Studio
 - Same setup as agent.ts but as module export
 - Used by Studio for visual debugging
@@ -181,6 +188,7 @@ The **Web UI method is recommended** as it works on all platforms and doesn't re
 **Description:** Cross-chain gas refill - swap USDC to ETH and bridge to target chain
 
 **Parameters:**
+
 - `amount` (string) - USDC amount (e.g., "5.00")
 - `network` (string) - Target network: "base-sepolia", "sepolia", or "polygon-amoy"
 - `targetAddress` (string) - Wallet address to receive gas (0x...)
@@ -188,6 +196,7 @@ The **Web UI method is recommended** as it works on all platforms and doesn't re
 **Payment:** Dynamic pricing based on amount and network
 
 **Example:**
+
 ```
 "Pump $10 USDC to 0x123... on base-sepolia"
 ```
@@ -197,6 +206,7 @@ The **Web UI method is recommended** as it works on all platforms and doesn't re
 **Description:** Get swap quote for ETH/USDC conversion
 
 **Parameters:**
+
 - `network` (string) - Network for swap quote
 - `amountIn` (string) - Amount of input token
 - `tokenIn` (string) - "ETH" or "USDC"
@@ -205,6 +215,7 @@ The **Web UI method is recommended** as it works on all platforms and doesn't re
 **Payment:** None (free)
 
 **Example:**
+
 ```
 "Get a quote for swapping 1 ETH to USDC on polygon-amoy"
 ```
@@ -256,6 +267,7 @@ pnpm dev:mcp
 ### "Payment failed" or "Insufficient funds"
 
 Your wallet needs testnet USDC on polygon-amoy. Get some from:
+
 - [Polygon Amoy Faucet](https://faucet.polygon.technology/)
 - Swap for USDC on a testnet DEX
 

@@ -15,13 +15,13 @@ import { executeUsdcToEthSwap } from "./shared/swap.ts"
 
 const CONFIG = {
   // ETH balance threshold - bridge USDC if ETH balance falls below this
-  ETH_BALANCE_THRESHOLD: parseUnits("0.001", 18),
+  ETH_BALANCE_THRESHOLD: parseUnits("0.01", 18),
 
   // Amount of USDC to bridge when refilling
-  USDC_BRIDGE_AMOUNT: "5",
+  USDC_BRIDGE_AMOUNT: "20",
 
   // Minimum USDC balance on Polygon Amoy before we stop bridging
-  MIN_POLYGON_USDC_BALANCE: parseUnits("10", 6),
+  MIN_POLYGON_USDC_BALANCE: parseUnits("50", 6),
 
   // USDC contract addresses
   USDC_ADDRESSES: {
@@ -86,11 +86,19 @@ async function getCdpAccount() {
     walletSecret: sharedEnv.CDP_WALLET_SECRET,
   })
 
-  cachedCdpAccount = await cdp.evm.createAccount({
+  // Try to get existing account first, only create if it doesn't exist
+  let account = await cdp.evm.getAccount({
     name: CDP_ACCOUNT_NAME,
-    idempotencyKey: CDP_ACCOUNT_IDEMPOTENCY_KEY,
   })
 
+  if (account == null) {
+    account = await cdp.evm.createAccount({
+      name: CDP_ACCOUNT_NAME,
+      idempotencyKey: CDP_ACCOUNT_IDEMPOTENCY_KEY,
+    })
+  }
+
+  cachedCdpAccount = account
   return cachedCdpAccount
 }
 

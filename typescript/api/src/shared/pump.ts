@@ -7,7 +7,6 @@ import type { PumpOperationData, PumpParams } from "./types.ts"
 import { sendEth, Wallets } from "./wallet.ts"
 import { createExactPaymentRequirements } from "./x402.ts"
 
-
 export function calculatePumpPaymentRequirements(
   params: PumpParams,
   x402Network: string,

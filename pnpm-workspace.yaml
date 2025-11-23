@@ -2,8 +2,16 @@ packages:
   - typescript/*
   - external/ampersend-sdk/typescript/packages/*
 
+overrides:
+  "@walletconnect/logger>pino": "10.1.0"
+
 onlyBuiltDependencies:
   - '@reown/appkit'
   - bufferutil
   - esbuild
   - utf-8-validate
+  - "@reown/appkit"
+  - keccak
+  - sharp
+  - unrs-resolver
+

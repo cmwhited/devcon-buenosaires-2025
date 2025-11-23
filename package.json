@@ -42,19 +42,5 @@
     "@edgeandnode/amp": "^0.0.51",
     "dotenv": "^17.2.3",
     "viem": "^2.39.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "@walletconnect/logger>pino": "10.1.0"
-    },
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "@reown/appkit",
-      "bufferutil",
-      "core-js-pure",
-      "esbuild",
-      "msgpackr-extract",
-      "utf-8-validate"
-    ]
   }
 }

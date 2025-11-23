@@ -28,10 +28,15 @@ export async function getWallets(): Promise<Wallets> {
 
 export async function getWallet(network: SupportedNetwork): Promise<WalletInfo> {
   const publicClient = getRpcClient(network)
-  const account = await cdp.evm.createAccount({
+  let account = await cdp.evm.getAccount({
     name: CDP_ACCOUNT_NAME,
-    idempotencyKey: CDP_ACCOUNT_IDEMPOTENCY_KEY,
   })
+  if (account == null) {
+    account = await cdp.evm.createAccount({
+      name: CDP_ACCOUNT_NAME,
+      idempotencyKey: CDP_ACCOUNT_IDEMPOTENCY_KEY,
+    })
+  }
   const customAccount = await account.useNetwork(publicClient.chain?.rpcUrls.default.http[0] as string)
   const balance = await publicClient.getBalance({ address: account.address })
   return { account: customAccount as unknown as EvmServerAccount, balance }
