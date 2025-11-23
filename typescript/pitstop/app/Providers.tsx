@@ -29,7 +29,7 @@ export function Providers({
         loginMethods: ["wallet"],
         embeddedWallets: {
           ethereum: {
-            createOnLogin: "users-without-wallets",
+            createOnLogin: "all-users",
           },
         },
         appearance: {
