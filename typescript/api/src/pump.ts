@@ -67,18 +67,7 @@ export function createProcessPumpPayment(x402Network: string, wallets: Wallets) 
     const { amount, network, targetAddress } = await extractPumpParams(c)
 
     try {
-      // 4.b. Swap USDC to ETH (mocked)
-      console.log(`[MOCK] Swapping ${amount} USDC to ETH...`)
-      await new Promise((resolve) => setTimeout(resolve, 100)) // Simulate async operation
       const ethAmount = parseFloat(amount) * 0.0003 // Mock conversion rate
-      console.log(`[MOCK] Swapped to ${ethAmount} ETH`)
-
-      // 4.c. Bridge ETH to target chain (mocked)
-      if (network !== x402Network) {
-        console.log(`[MOCK] Bridging ${ethAmount} ETH to ${network}...`)
-        await new Promise((resolve) => setTimeout(resolve, 100))
-        console.log(`[MOCK] Bridge initiated`)
-      }
 
       // 4.d. Transfer ETH to target address (REAL)
       const targetNetwork = network as SupportedNetwork

@@ -37,20 +37,18 @@ console.log("\n")
 const x402PayToAddress = wallets["base-sepolia"].account.address
 
 const app = new Hono<ApiContext>()
+app.use(
+  "*",
+  cors({
+    origin: "http://localhost:3000",
+    exposeHeaders: ["X-PAYMENT-RESPONSE"],
+  }),
+)
 app.use(logger())
 app.use(prettyJSON())
 app.use("*", requestId())
 app.use(secureHeaders())
 app.use(contextStorage())
-app.use(
-  "/api/*",
-  cors({
-    allowHeaders: ["Content-Type", "Accept", "Authorization", "User-Agent", "X-PAYMENT", "X-PAYMENT-RESPONSE"],
-    allowMethods: ["POST", "GET", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    exposeHeaders: ["X-PAYMENT-RESPONSE"],
-    origin: ["http://localhost:3000"],
-  }),
-)
 app.get("/", (c) => c.json({ status: "OK" }))
 
 app.post(
