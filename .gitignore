@@ -85,3 +85,5 @@ crates/amp-registry-api/amp_registry_config.toml
 **/target/
 **/*.rs.bk
 *.pdb
+
+**/.langgraph_api

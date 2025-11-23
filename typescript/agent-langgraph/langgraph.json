@@ -1,0 +1,8 @@
+{
+  "node_version": "20",
+  "dockerfile_lines": [],
+  "graphs": {
+    "gas_station_agent": "./src/graph.ts:graph"
+  },
+  "env": ".env"
+}
