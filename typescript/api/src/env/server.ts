@@ -10,7 +10,6 @@ export const env = createEnv({
     MCP_PORT: z.coerce.number().default(8080),
     PRIVY_APP_ID: z.string().min(1),
     PRIVY_APP_SECRET: z.string().min(1),
-    X402_FACILITATOR_URL: z.string().url(),
   },
   runtimeEnv: process.env,
 })
