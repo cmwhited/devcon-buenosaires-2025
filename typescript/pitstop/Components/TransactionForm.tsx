@@ -115,6 +115,7 @@ export function TransactionForm({ user }: Readonly<{ user: User }>) {
   })
 
   const [recipientHint, setRecipientHint] = useState<string | null>(null)
+  const [quotedAmount, setQuotedAmount] = useState<string | null>(null)
 
   const txForm = useAppForm({
     defaultValues,
@@ -261,7 +262,17 @@ export function TransactionForm({ user }: Readonly<{ user: User }>) {
               <txForm.AppField name="network">
                 {(field) => <field.NetworkSelect id="network" name="network" required label="Network" />}
               </txForm.AppField>
-              <txForm.AppField name="amount">
+              <txForm.AppField name="amount" listeners={{
+                onChangeDebounceMs: 500,
+                async onChange({ value }) {
+                  await fetchQuote({
+                    network: txForm.getFieldValue("network"),
+                    amountIn: value,
+                    tokenIn: "USDC",
+                    tokenOut: "ETH",
+                  }).then((response) => setQuotedAmount(response.amountOut))
+                },
+              }}>
                 {(field) => (
                   <field.RecipientAddress
                     id="amount"
@@ -269,6 +280,7 @@ export function TransactionForm({ user }: Readonly<{ user: User }>) {
                     type="number"
                     placeholder="In USDC"
                     label="Amount of gas, in USDC, to send"
+                    hint={quotedAmount ? `Estimated amount of ETH to receive: ${quotedAmount} ETH` : undefined}
                     required
                   />
                 )}
@@ -285,4 +297,47 @@ export function TransactionForm({ user }: Readonly<{ user: User }>) {
       <TransactionsTable user={user} />
     </div>
   )
+}
+
+type QuoteRequest = {
+  network: "sepolia" | "base-sepolia" | "polygon-amoy"
+  amountIn: string,
+  tokenIn: "USDC",
+  tokenOut: "ETH"
+}
+const QuoteResponseSchema = z.object({
+  amountIn: z.string(),
+  amountOut: z.string(),
+  tokenIn: z.literal("USDC"),
+  tokenOut: z.literal("ETH"),
+  rate: z.string(),
+  fee: z.number(),
+  tickSpacing: z.number(),
+})
+type QuoteResponse = z.infer<typeof QuoteResponseSchema>
+async function fetchQuote(request: QuoteRequest): Promise<QuoteResponse> {
+  try {
+    const response = await fetch("http://localhost:4000/api/quote", {
+      method: "POST",
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    if (!response.ok) {
+      console.error("failure calling fetch to quote endpoint. failure status code", response.status)
+      throw new Error(`/api/quote endpoint returned not ok status [${response.status}]`)
+    }
+    const body = await response.json()
+
+    const maybeParsedBody = QuoteResponseSchema.safeParse(body)
+    if (!maybeParsedBody.success) {
+      console.error("failure parsing quote response", { body })
+      throw new Error("failure parsing quote response")
+    }
+    return maybeParsedBody.data
+  } catch (error) {
+    console.error("failure calling fetch to quote endpoint", { error })
+    throw error
+  }
 }

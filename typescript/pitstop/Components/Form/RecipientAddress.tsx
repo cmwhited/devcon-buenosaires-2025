@@ -57,7 +57,7 @@ export function RecipientAddress({ id, name, label, hint, ...rest }: Readonly<Re
           />
         </div>
         {hint != null && !hasErrors ? (
-          <p id={`${id}-hint`} className="mt-1.5 text-sm/6 text-(--color-oil-gray)">
+          <p id={`${id}-hint`} className="mt-1.5 text-sm text-[#1a1a1a]">
             {hint}
           </p>
         ) : null}
