@@ -9,8 +9,8 @@ import { secureHeaders } from "hono/secure-headers"
 import { formatEther } from "viem"
 
 import { env } from "./env/server.ts"
-import { x402Middleware } from "./middleware.ts"
 import { runGasStationCheck } from "./gas-station.ts"
+import { x402Middleware } from "./middleware.ts"
 import {
   createProcessPumpPayment,
   createPumpPaymentRequirements,

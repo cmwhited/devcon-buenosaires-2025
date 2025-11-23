@@ -1,12 +1,12 @@
-import { BridgeKit } from "@circle-fin/bridge-kit"
 import { createAdapterFromProvider } from "@circle-fin/adapter-viem-v2"
+import { BridgeKit } from "@circle-fin/bridge-kit"
 import { CdpClient } from "@coinbase/cdp-sdk"
 import { createPublicClient, createWalletClient, http, parseUnits } from "viem"
-import { baseSepolia, polygonAmoy, sepolia } from "viem/chains"
 import { toAccount } from "viem/accounts"
+import { baseSepolia, polygonAmoy, sepolia } from "viem/chains"
 
-import { env } from "./env/server.ts"
-import { executeUsdcToEthSwap } from "./swap.ts"
+import { sharedEnv } from "./shared/env.ts"
+import { executeUsdcToEthSwap } from "./shared/swap.ts"
 
 // ============================================================================
 // CONFIGURATION - Adjust these values as needed
@@ -80,9 +80,9 @@ async function getCdpAccount() {
   if (cachedCdpAccount) return cachedCdpAccount
 
   const cdp = new CdpClient({
-    apiKeyId: env.CDP_API_KEY_ID,
-    apiKeySecret: env.CDP_API_KEY_SECRET,
-    walletSecret: env.CDP_WALLET_SECRET,
+    apiKeyId: sharedEnv.CDP_API_KEY_ID,
+    apiKeySecret: sharedEnv.CDP_API_KEY_SECRET,
+    walletSecret: sharedEnv.CDP_WALLET_SECRET,
   })
 
   cachedCdpAccount = await cdp.evm.createAccount({
@@ -97,10 +97,7 @@ async function getCdpAccount() {
 // BALANCE CHECKING
 // ============================================================================
 
-async function checkEthBalance(
-  chain: DestinationChain,
-  address: `0x${string}`,
-): Promise<BalanceCheckResult> {
+async function checkEthBalance(chain: DestinationChain, address: `0x${string}`): Promise<BalanceCheckResult> {
   const chainConfig = chain === "sepolia" ? sepolia : baseSepolia
   const rpcUrl = CONFIG.RPC_URLS[chain]
 
@@ -183,7 +180,7 @@ async function executeBridge(toChain: DestinationChain, amount: string): Promise
     })
 
     return {
-      request: async ({ method, params }: { method: string; params?: any[] }) => {
+      request: async ({ method, params }: { method: string; params?: Array<any> }) => {
         if (method === "eth_accounts" || method === "eth_requestAccounts") {
           return [account.address]
         }
