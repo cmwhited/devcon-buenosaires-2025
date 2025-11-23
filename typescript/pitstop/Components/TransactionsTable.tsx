@@ -1,25 +1,19 @@
 "use client"
 
 import { User } from "@privy-io/react-auth"
-import { eq, inArray, useLiveQuery } from "@tanstack/react-db"
+import { useLiveQuery } from "@tanstack/react-db"
 import Link from "next/link"
 
 import { transactionCollection } from "@/collections/transactions"
 import { classnames } from "@/utils/classnames"
 
 export function TransactionsTable({ user }: Readonly<{ user: User }>) {
-  const accounts = user.linkedAccounts
-    .filter((acct) => acct.type === "wallet" || acct.type === "smart_wallet")
-    .map((acct) => acct.address)
   const {
     data: transactions,
     isLoading,
     isError,
   } = useLiveQuery((q) =>
-    q
-      .from({ tx: transactionCollection })
-      .where(({ tx }) => inArray(tx.to, accounts))
-      .orderBy(({ tx }) => tx.block_num, { direction: "desc" }),
+    q.from({ tx: transactionCollection }).orderBy(({ tx }) => tx.block_num, { direction: "desc" }),
   )
 
   if (isLoading) {
@@ -40,8 +34,8 @@ export function TransactionsTable({ user }: Readonly<{ user: User }>) {
 
   return (
     <div className="mt-8 flex flex-col gap-y-4">
-      <h5 className="text-xl font-semibold text-(--color-oil-black)">Transaction History</h5>
-      <div className="flow-root">
+      <h5 className="text-xl font-semibold text-(--color-oil-black)">Transaction History (Base Sepolia only)</h5>
+      <div className="flow-root h-full max-h-[700px] overflow-y-auto">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full py-2 align-middle">
             <div className="overflow-hidden bg-[#2D2D2D] shadow-sm outline-1 outline-(--color-oil-gray) sm:rounded-xs">
