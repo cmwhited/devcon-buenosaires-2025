@@ -1,0 +1,3 @@
+[submodule "external/ampersend-sdk"]
+	path = external/ampersend-sdk
+	url = https://github.com/edgeandnode/ampersend-sdk.git
