@@ -1,7 +1,8 @@
 import "dotenv/config"
+import { createReactAgent } from "@langchain/langgraph/prebuilt"
 import { loadMcpTools } from "@langchain/mcp-adapters"
 import { ChatOpenAI } from "@langchain/openai"
-import { createReactAgent } from "@langchain/langgraph/prebuilt"
+
 import { createMcpClient } from "./mcp-client.ts"
 
 async function main() {
