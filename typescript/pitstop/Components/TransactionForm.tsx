@@ -262,17 +262,20 @@ export function TransactionForm({ user }: Readonly<{ user: User }>) {
               <txForm.AppField name="network">
                 {(field) => <field.NetworkSelect id="network" name="network" required label="Network" />}
               </txForm.AppField>
-              <txForm.AppField name="amount" listeners={{
-                onChangeDebounceMs: 500,
-                async onChange({ value }) {
-                  await fetchQuote({
-                    network: txForm.getFieldValue("network"),
-                    amountIn: value,
-                    tokenIn: "USDC",
-                    tokenOut: "ETH",
-                  }).then((response) => setQuotedAmount(response.amountOut))
-                },
-              }}>
+              <txForm.AppField
+                name="amount"
+                listeners={{
+                  onChangeDebounceMs: 500,
+                  async onChange({ value }) {
+                    await fetchQuote({
+                      network: txForm.getFieldValue("network"),
+                      amountIn: value,
+                      tokenIn: "USDC",
+                      tokenOut: "ETH",
+                    }).then((response) => setQuotedAmount(response.amountOut))
+                  },
+                }}
+              >
                 {(field) => (
                   <field.RecipientAddress
                     id="amount"
@@ -301,8 +304,8 @@ export function TransactionForm({ user }: Readonly<{ user: User }>) {
 
 type QuoteRequest = {
   network: "sepolia" | "base-sepolia" | "polygon-amoy"
-  amountIn: string,
-  tokenIn: "USDC",
+  amountIn: string
+  tokenIn: "USDC"
   tokenOut: "ETH"
 }
 const QuoteResponseSchema = z.object({

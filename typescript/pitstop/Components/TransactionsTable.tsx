@@ -1,13 +1,16 @@
 "use client"
 
 import { User } from "@privy-io/react-auth"
-import { inArray, useLiveQuery } from "@tanstack/react-db"
+import { eq, inArray, useLiveQuery } from "@tanstack/react-db"
 import Link from "next/link"
 
 import { transactionCollection } from "@/collections/transactions"
 import { classnames } from "@/utils/classnames"
 
 export function TransactionsTable({ user }: Readonly<{ user: User }>) {
+  const accounts = user.linkedAccounts
+    .filter((acct) => acct.type === "wallet" || acct.type === "smart_wallet")
+    .map((acct) => acct.address)
   const {
     data: transactions,
     isLoading,
@@ -15,13 +18,7 @@ export function TransactionsTable({ user }: Readonly<{ user: User }>) {
   } = useLiveQuery((q) =>
     q
       .from({ tx: transactionCollection })
-      .where(({ tx }) =>
-        inArray(tx.to, [
-          user.linkedAccounts
-            .filter((acct) => acct.type === "wallet" || acct.type === "smart_wallet")
-            .map((acct) => acct.address),
-        ]),
-      )
+      .where(({ tx }) => inArray(tx.to, accounts))
       .orderBy(({ tx }) => tx.block_num, { direction: "desc" }),
   )
 
