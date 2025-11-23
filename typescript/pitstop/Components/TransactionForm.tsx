@@ -117,7 +117,9 @@ export function TransactionForm({ user }: Readonly<{ user: User }>) {
     defaultValues,
     validators: {
       onChangeAsync: TransactionFormSchema,
+      onChange: TransactionFormSchema,
       onSubmitAsync: TransactionFormSchema,
+      onBlur: TransactionFormSchema,
     },
     async onSubmit({ value }) {
       await mutateAsync(value)

@@ -41,7 +41,7 @@ const app = new Hono<ApiContext>()
 app.use(
   "*",
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:3001",
     exposeHeaders: ["X-PAYMENT-RESPONSE"],
   }),
 )
