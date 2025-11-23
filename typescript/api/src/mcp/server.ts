@@ -34,12 +34,61 @@ server.addTool({
   execute: withX402Payment({
     onExecute: async ({ args }) => {
       const resource = `http://localhost:${env.MCP_PORT}/mcp/pump`
-      return calculatePumpPaymentRequirements(args as PumpParams, sharedEnv.X402_NETWORK, x402PayToAddress, resource)
+      const requirements = calculatePumpPaymentRequirements(
+        args as PumpParams,
+        sharedEnv.X402_NETWORK,
+        x402PayToAddress,
+        resource,
+      )
+
+      // Log payment requirements being sent to client
+      console.log(
+        "[x402] Sending payment requirements:",
+        JSON.stringify({
+          network: requirements.network,
+          maxAmount: requirements.maxAmountRequired,
+          payTo: requirements.payTo,
+          params: args,
+        }),
+      )
+
+      return requirements
     },
     onPayment: async ({ payment, requirements }) => {
-      return useFacilitator({
+      // Log payment received from client
+      console.log(
+        "[x402] Received payment:",
+        JSON.stringify({
+          network: payment.network,
+          // amount: payment.payment.value,
+          // signer: payment.payment.from,
+          requirementsMaxAmount: requirements.maxAmountRequired,
+        }),
+      )
+
+      const facilitator = useFacilitator({
         url: sharedEnv.X402_FACILITATOR_URL as `${string}://${string}`,
-      }).settle(payment, requirements)
+      })
+
+      // Step 1: Verify payment first
+      console.log("[x402] Verifying payment...")
+      const verification = await facilitator.verify(payment, requirements)
+      if (!verification.isValid) {
+        console.error("[x402] Payment verification failed:", verification.invalidReason)
+        throw new Error(verification.invalidReason ?? "Payment verification failed")
+      }
+      console.log("[x402] Payment verified successfully")
+
+      // Step 2: Settle only after successful verification
+      console.log("[x402] Settling payment...")
+      const settlement = await facilitator.settle(payment, requirements)
+      if (!settlement.success) {
+        console.error("[x402] Settlement failed:", settlement.errorReason)
+        throw new Error(settlement.errorReason ?? "Settlement failed")
+      }
+      console.log("[x402] Payment settled successfully")
+
+      return settlement
     },
   })(async (args) => {
     const result = await executePump(args as PumpParams, wallets, sharedEnv.X402_NETWORK)

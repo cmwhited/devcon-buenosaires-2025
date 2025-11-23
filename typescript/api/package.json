@@ -26,6 +26,7 @@
     "@circle-fin/adapter-viem-v2": "^1.1.1",
     "@circle-fin/bridge-kit": "^1.1.2",
     "@coinbase/cdp-sdk": "^1.38.6",
+    "x402": "^0.6.6",
     "@edgeandnode/ampersend-sdk": "workspace:^",
     "@fastify/cors": "^11.1.0",
     "@hono/node-server": "^1.19.6",
@@ -39,7 +40,6 @@
     "fastmcp": "github:edgeandnode/fastmcp#6446ea7b56eb291a6d4d7321e4a41ff0aacba1ef",
     "hono": "^4.10.6",
     "viem": "^2.39.3",
-    "x402": "^0.7.3",
     "x402-fetch": "^0.7.3",
     "x402-hono": "^0.7.3",
     "zod": "^4.1.12"
