@@ -4,19 +4,28 @@
   --font-sans: var(--font-anton);
   --font-mono: var(--font-space-mono);
   --dirty-white: #f5f5dc;
-  
+
   --bg-oilcan: linear-gradient(180deg, #3c2414 0%, #1f1206 50%, #2a1a0c 100%);
 
-  --color-neon-green: #00FF41;
-  --color-neon-green-dark: #00CC33;
-  --color-rust: #FF6B35;
+  --color-neon-green: #00ff41;
+  --color-neon-green-dark: #00cc33;
+  --color-rust: #ff6b35;
   --color-oil-black: #1a1a1a;
   --color-oil-gray: #2d2d2d;
-  --color-dirty-white: #F5F5DC;
-  
-  --shadow-industrial: 4px 4px 0 #000000, 6px 6px 12px rgba(0,0,0,0.3);
-  --shadow-industrial-sm: 2px 2px 0 #000000, 3px 3px 8px rgba(0,0,0,0.3);
-  --shadow-inset-industrial: inset 0 2px 4px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(255,255,255,0.05);
+  --color-dirty-white: #f5f5dc;
+
+  --shadow-industrial: 4px 4px 0 #000000, 6px 6px 12px rgba(0, 0, 0, 0.3);
+  --shadow-industrial-sm: 2px 2px 0 #000000, 3px 3px 8px rgba(0, 0, 0, 0.3);
+  --shadow-inset-industrial: inset 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+
+  /* Status colors */
+  --color-status-success: #00ff41;
+  --color-status-pending: #ffd700;
+  --color-status-failed: #ff6b35;
+
+  /* Table specific */
+  --color-row-hover: #1a1a1a;
+  --color-row-border: #333333;
 
   @keyframes flicker {
     0%,

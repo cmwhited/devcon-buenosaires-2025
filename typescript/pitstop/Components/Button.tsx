@@ -9,12 +9,14 @@ export function Button({ children, type = "button", ...rest }: Readonly<ButtonPr
   return (
     <ButtonPrimitive
       {...rest}
-      type={type}
       nativeButton={true}
-      className="inline-flex cursor-pointer items-center justify-center gap-x-1.5 rounded px-4 py-1.5 font-mono shadow"
+      type={type}
+      className="inline-flex cursor-pointer items-center justify-center gap-x-1.5 rounded px-4 py-1.5 font-mono tracking-wider uppercase transition-all duration-300 hover:shadow-[0_0_15px_rgba(255,215,0,1),0_0_25px_rgba(255,215,0,0.5),2px_2px_0_#000]"
       style={{
         background: "var(--bg-oilcan)",
-        color: "var(--dirty-white)",
+        color: "#FFD700",
+        border: "3px solid #000",
+        boxShadow: "0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5), 2px 2px 0 #000",
       }}
     >
       {children}

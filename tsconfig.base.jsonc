@@ -37,6 +37,7 @@
     "incremental": true,
     "removeComments": false,
     "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": true,
     "jsx": "react-jsx",
     "paths": {},
   },

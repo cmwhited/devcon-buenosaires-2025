@@ -15,6 +15,7 @@ import {
   createPumpResponse,
   PumpOperationData,
 } from "./pump.ts"
+import { getSwapQuote, SwapQuoteRequest } from "./swap.ts"
 import { logServerBoot } from "./utils.ts"
 import { getWallets } from "./wallet.ts"
 import { x402Middleware } from "./x402.ts"
@@ -59,6 +60,17 @@ app.post(
     onSettle: createPumpResponse,
   }),
 )
+
+app.post("/api/quote", async (c) => {
+  try {
+    const body = await c.req.json<SwapQuoteRequest>()
+    console.log(body)
+    const quote = await getSwapQuote(body)
+    return c.json(quote)
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : "Unknown error" }, 400)
+  }
+})
 
 const server = serve({
   fetch: app.fetch,
