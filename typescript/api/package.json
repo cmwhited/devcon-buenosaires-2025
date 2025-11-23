@@ -32,6 +32,7 @@
     "@privy-io/server-auth": "^1.32.5",
     "@t3-oss/env-core": "^0.13.8",
     "@uniswap/sdk-core": "^7.9.0",
+    "@uniswap/universal-router-sdk": "^4.23.0",
     "@uniswap/v4-sdk": "^1.23.0",
     "dotenv": "^17.2.3",
     "ethers": "^6.15.0",

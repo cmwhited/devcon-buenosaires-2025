@@ -6,6 +6,7 @@ import { baseSepolia, polygonAmoy, sepolia } from "viem/chains"
 import { toAccount } from "viem/accounts"
 
 import { env } from "./env/server.ts"
+import { executeUsdcToEthSwap } from "./swap.ts"
 
 // ============================================================================
 // CONFIGURATION - Adjust these values as needed
@@ -13,10 +14,10 @@ import { env } from "./env/server.ts"
 
 const CONFIG = {
   // ETH balance threshold - bridge USDC if ETH balance falls below this
-  ETH_BALANCE_THRESHOLD: parseUnits("0.001", 18), // 0.001 ETH
+  ETH_BALANCE_THRESHOLD: parseUnits("2.001", 18), // 0.001 ETH
 
   // Amount of USDC to bridge when refilling
-  USDC_BRIDGE_AMOUNT: "5", // 5 USDC
+  USDC_BRIDGE_AMOUNT: "1", // 5 USDC
 
   // Minimum USDC balance on Polygon Amoy before we stop bridging
   MIN_POLYGON_USDC_BALANCE: parseUnits("10", 6), // 10 USDC
@@ -203,18 +204,7 @@ async function executeBridge(toChain: DestinationChain, amount: string): Promise
           const [txRequest] = params || []
 
           // Explicitly map fields with proper type conversion
-          const hash = await walletClient.sendTransaction({
-            to: txRequest.to,
-            data: txRequest.data,
-            value: txRequest.value ? BigInt(txRequest.value) : undefined,
-            gas: txRequest.gas ? BigInt(txRequest.gas) : undefined,
-            gasPrice: txRequest.gasPrice ? BigInt(txRequest.gasPrice) : undefined,
-            maxFeePerGas: txRequest.maxFeePerGas ? BigInt(txRequest.maxFeePerGas) : undefined,
-            maxPriorityFeePerGas: txRequest.maxPriorityFeePerGas
-              ? BigInt(txRequest.maxPriorityFeePerGas)
-              : undefined,
-            nonce: txRequest.nonce ? Number(txRequest.nonce) : undefined,
-          })
+          const hash = await walletClient.sendTransaction(txRequest)
 
           return hash
         }
@@ -265,6 +255,21 @@ async function executeBridge(toChain: DestinationChain, amount: string): Promise
 
     if (result.state === "success") {
       console.log(`[GAS-STATION] ✅ Successfully bridged ${amount} USDC to ${toChain}`)
+
+      // After successful bridge, swap USDC to ETH
+      try {
+        console.log(`[GAS-STATION] Swapping ${amount} USDC to ETH on ${toChain}...`)
+        const swapResult = await executeUsdcToEthSwap(toChain, cdpAccount, amount)
+
+        if (swapResult.success) {
+          console.log(`[GAS-STATION] ✅ Swap successful: ${swapResult.txHash}`)
+        } else {
+          console.error(`[GAS-STATION] ❌ Swap failed: ${swapResult.error}`)
+        }
+      } catch (swapError) {
+        console.error(`[GAS-STATION] Swap execution failed:`, swapError)
+        // Don't throw - USDC is bridged but not swapped, can be done manually
+      }
     } else {
       console.error(`[GAS-STATION] ❌ Bridge failed with state: ${result.state}`)
     }
