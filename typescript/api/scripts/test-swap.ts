@@ -1,6 +1,7 @@
 import { ChainId, Token } from "@uniswap/sdk-core"
 import { SwapExactInSingle } from "@uniswap/v4-sdk"
-import { ethers, formatUnits, JsonRpcProvider, parseUnits } from "ethers"
+import { createPublicClient, formatUnits, getContract, http, parseUnits } from "viem"
+import { sepolia } from "viem/chains"
 
 const ETH_TOKEN = new Token(ChainId.SEPOLIA, "0x0000000000000000000000000000000000000000", 18, "ETH", "Ether")
 
@@ -20,9 +21,14 @@ const CurrentConfig: SwapExactInSingle = {
   hookData: "0x00",
 }
 
-const quoterContract = new ethers.Contract(
-  "0x61b3f2011a92d183c7dbadbda940a7555ccf9227",
-  [
+const publicClient = createPublicClient({
+  chain: sepolia,
+  transport: http("https://gateway.tenderly.co/public/sepolia"),
+})
+
+const quoterContract = getContract({
+  address: "0x61b3f2011a92d183c7dbadbda940a7555ccf9227",
+  abi: [
     {
       inputs: [{ internalType: "contract IPoolManager", name: "_poolManager", type: "address" }],
       stateMutability: "nonpayable",
@@ -305,14 +311,16 @@ const quoterContract = new ethers.Contract(
       type: "function",
     },
   ],
-  new JsonRpcProvider("https://gateway.tenderly.co/public/sepolia"),
-)
-
-const quotedAmountOut = await quoterContract.quoteExactInputSingle.staticCall({
-  poolKey: CurrentConfig.poolKey,
-  zeroForOne: CurrentConfig.zeroForOne,
-  exactAmount: CurrentConfig.amountIn,
-  hookData: CurrentConfig.hookData,
+  client: publicClient,
 })
 
-console.log(formatUnits(quotedAmountOut.amountOut, USDC_TOKEN.decimals))
+const quotedAmountOut = (await quoterContract.read.quoteExactInputSingle([
+  {
+    poolKey: CurrentConfig.poolKey,
+    zeroForOne: CurrentConfig.zeroForOne,
+    exactAmount: BigInt(CurrentConfig.amountIn),
+    hookData: CurrentConfig.hookData,
+  },
+])) as [bigint, bigint]
+
+console.log(formatUnits(quotedAmountOut[0], USDC_TOKEN.decimals))

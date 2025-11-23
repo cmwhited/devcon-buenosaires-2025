@@ -1,8 +1,7 @@
 import { ChainId, Token } from "@uniswap/sdk-core"
 import { CommandType, RoutePlanner } from "@uniswap/universal-router-sdk"
 import { Actions, V4Planner } from "@uniswap/v4-sdk"
-import { Contract, formatUnits, JsonRpcProvider, parseUnits } from "ethers"
-import { createWalletClient, http, parseUnits as viemParseUnits } from "viem"
+import { createWalletClient, formatUnits, getContract, type GetContractReturnType, http, parseUnits } from "viem"
 import { toAccount } from "viem/accounts"
 import { baseSepolia, sepolia } from "viem/chains"
 
@@ -84,11 +83,11 @@ export async function getSwapQuote(request: SwapQuoteRequest): Promise<SwapQuote
   const { quoter: QUOTER_ADDRESS, usdc: USDC_TOKEN, eth: ETH_TOKEN } = getUniswapContext(request.network)
 
   const publicClient = getRpcClient(request.network)
-  const quoterContract = new Contract(
-    QUOTER_ADDRESS,
-    QUOTER_ABI,
-    new JsonRpcProvider(publicClient.chain?.rpcUrls.default.http[0]),
-  )
+  const quoterContract = getContract({
+    address: QUOTER_ADDRESS as `0x${string}`,
+    abi: QUOTER_ABI,
+    client: publicClient,
+  })
 
   const { amountIn, tokenIn, tokenOut } = request
 
@@ -143,7 +142,7 @@ export async function getSwapQuote(request: SwapQuoteRequest): Promise<SwapQuote
 
 async function tryGetQuote(
   poolConfig: PoolConfig,
-  quoterContract: Contract,
+  quoterContract: GetContractReturnType<typeof QUOTER_ABI, ReturnType<typeof getRpcClient>>,
   zeroForOne: boolean,
   amountInWei: string,
   ethToken: Token,
@@ -152,21 +151,23 @@ async function tryGetQuote(
 ): Promise<{ amountOut: bigint; config: PoolConfig } | null> {
   try {
     // Always use sorted order: ETH (0x0000...) as currency0, USDC as currency1
-    const quotedAmountOut = await quoterContract.quoteExactInputSingle.staticCall({
-      poolKey: {
-        currency0: ethToken.address,
-        currency1: usdcToken.address,
-        fee: poolConfig.fee,
-        tickSpacing: poolConfig.tickSpacing,
-        hooks: "0x0000000000000000000000000000000000000000",
+    const quotedAmountOut = (await quoterContract.read.quoteExactInputSingle([
+      {
+        poolKey: {
+          currency0: ethToken.address,
+          currency1: usdcToken.address,
+          fee: poolConfig.fee,
+          tickSpacing: poolConfig.tickSpacing,
+          hooks: "0x0000000000000000000000000000000000000000",
+        },
+        zeroForOne,
+        exactAmount: BigInt(amountInWei),
+        hookData: "0x00",
       },
-      zeroForOne,
-      exactAmount: amountInWei,
-      hookData: "0x00",
-    })
+    ])) as [bigint, bigint]
 
     return {
-      amountOut: quotedAmountOut.amountOut,
+      amountOut: quotedAmountOut[0],
       config: poolConfig,
     }
   } catch {
@@ -394,7 +395,7 @@ export async function executeUsdcToEthSwap(
       transport: http(),
     })
 
-    const usdcAmountInWei = viemParseUnits(usdcAmountIn, 6)
+    const usdcAmountInWei = parseUnits(usdcAmountIn, 6)
 
     // Get quote
     const quote = await getSwapQuote({
